@@ -1,0 +1,467 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1"><title>MongoDB Shell 数据归档指南：将大表数据归档到另一表 - Guixian 的日常记录</title>
+<meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=Cache-Control content="no-transform"><meta http-equiv=Cache-Control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Chen Guixian"><meta name=description content="将大表中的部分数据归档到另一个表是数据管理的常见需求，特别是对于需要保持主表性能同时又需要保留历史数据的情况。介绍 MongoDB Shell 中实现数据归档的几种方法"><meta name=keywords content="MongoDB"><meta name=generator content="Hugo 0.134.3 with theme even"><link rel=canonical href=https://blog.chenguixian.com/post/mongodb/mongodb-archive-large-collection-data/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link href=/sass/main.min.da774276428e8a6854e28c9290a6dfdbe7a5a343455f0a76358a2f66d0a56366.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:url" content="https://blog.chenguixian.com/post/mongodb/mongodb-archive-large-collection-data/"><meta property="og:site_name" content="Guixian 的日常记录"><meta property="og:title" content="MongoDB Shell 数据归档指南：将大表数据归档到另一表"><meta property="og:description" content="将大表中的部分数据归档到另一个表是数据管理的常见需求，特别是对于需要保持主表性能同时又需要保留历史数据的情况。介绍 MongoDB Shell 中实现数据归档的几种方法"><meta property="og:locale" content="zh_cn"><meta property="og:type" content="article"><meta property="article:section" content="post"><meta property="article:published_time" content="2025-07-17T22:28:04+08:00"><meta property="article:modified_time" content="2025-07-17T22:28:04+08:00"><meta itemprop=name content="MongoDB Shell 数据归档指南：将大表数据归档到另一表"><meta itemprop=description content="将大表中的部分数据归档到另一个表是数据管理的常见需求，特别是对于需要保持主表性能同时又需要保留历史数据的情况。介绍 MongoDB Shell 中实现数据归档的几种方法"><meta itemprop=datePublished content="2025-07-17T22:28:04+08:00"><meta itemprop=dateModified content="2025-07-17T22:28:04+08:00"><meta itemprop=wordCount content="2191"><meta itemprop=keywords content="MongoDB"><meta name=twitter:card content="summary"><meta name=twitter:title content="MongoDB Shell 数据归档指南：将大表数据归档到另一表"><meta name=twitter:description content="将大表中的部分数据归档到另一个表是数据管理的常见需求，特别是对于需要保持主表性能同时又需要保留历史数据的情况。介绍 MongoDB Shell 中实现数据归档的几种方法"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script><script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>Guixian 的日常记录</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/><li class=mobile-menu-item>Home</li></a><a href=/post/><li class=mobile-menu-item>Archives</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>Guixian 的日常记录</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/>Home</a></li><li class=menu-item><a class=menu-item-link href=/post/>Archives</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>MongoDB Shell 数据归档指南：将大表数据归档到另一表</h1><div class=post-meta><span class=post-time>2025-07-17</span><div class=post-category><a href=/categories/mongodb/>MongoDB</a></div></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>文章目录</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><ul><li><a href=#方法一使用-aggregate-和-out-操作符>方法一：使用 aggregate 和 $out 操作符</a></li><li><a href=#方法二查询后批量插入适合追加归档>方法二：查询后批量插入（适合追加归档）</a></li><li><a href=#方法三批处理归档处理超大数据集>方法三：批处理归档（处理超大数据集）</a></li><li><a href=#方法四使用原子操作事务归档>方法四：使用原子操作（事务）归档</a></li><li><a href=#特殊情况基于-objectid>特殊情况（基于 ObjectId）</a><ul><li><a href=#objectid-时间戳的原理>ObjectId 时间戳的原理</a></li><li><a href=#查询历史数据>查询历史数据</a></li><li><a href=#归档历史数据>归档历史数据</a></li><li><a href=#删除历史数据>删除历史数据</a></li><li><a href=#规范化历史数据管理>规范化历史数据管理</a></li></ul></li><li><a href=#最佳实践和注意事项>最佳实践和注意事项</a></li></ul></li></ul></nav></div></div><div class=post-content><p>将大表中的部分数据归档到另一个表是数据管理的常见需求，特别是对于需要保持主表性能同时又需要保留历史数据的情况。</p><p>下面介绍 MongoDB Shell 中实现数据归档的几种方法：</p><h2 id=方法一使用-aggregate-和-out-操作符>方法一：使用 aggregate 和 $out 操作符</h2><p>这种方法适合一次性归档大量数据：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=nx>db</span><span class=p>.</span><span class=nx>sourceCollection</span><span class=p>.</span><span class=nx>aggregate</span><span class=p>([</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 查询条件，选择需要归档的数据
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=p>{</span> <span class=nx>$match</span><span class=o>:</span> <span class=p>{</span> <span class=nx>createdDate</span><span class=o>:</span> <span class=p>{</span> <span class=nx>$lt</span><span class=o>:</span> <span class=nx>ISODate</span><span class=p>(</span><span class=s2>&#34;2023-01-01&#34;</span><span class=p>)</span> <span class=p>}</span> <span class=p>}</span> <span class=p>},</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 可选：对数据进行转换或添加额外字段
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=p>{</span> <span class=nx>$addFields</span><span class=o>:</span> <span class=p>{</span> <span class=nx>archivedAt</span><span class=o>:</span> <span class=k>new</span> <span class=nb>Date</span><span class=p>()</span> <span class=p>}</span> <span class=p>},</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 输出到目标集合
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=p>{</span> <span class=nx>$out</span><span class=o>:</span> <span class=s2>&#34;archiveCollection&#34;</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>])</span>
+</span></span></code></pre></td></tr></table></div></div><p><strong>注意</strong>：<code>$out</code> 会替换目标集合中的所有文档。<strong>如果想要往原先已有的归档表追加数据，需要使用以下方法。</strong></p><h2 id=方法二查询后批量插入适合追加归档>方法二：查询后批量插入（适合追加归档）</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// 查询需要归档的文档
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>docsToArchive</span> <span class=o>=</span> <span class=nx>db</span><span class=p>.</span><span class=nx>sourceCollection</span><span class=p>.</span><span class=nx>find</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span> <span class=nx>createdDate</span><span class=o>:</span> <span class=p>{</span> <span class=nx>$lt</span><span class=o>:</span> <span class=nx>ISODate</span><span class=p>(</span><span class=s2>&#34;2023-01-01&#34;</span><span class=p>)</span> <span class=p>}</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>).</span><span class=nx>toArray</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 给文档添加归档时间戳
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nx>docsToArchive</span><span class=p>.</span><span class=nx>forEach</span><span class=p>(</span><span class=nx>doc</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>doc</span><span class=p>.</span><span class=nx>archivedAt</span> <span class=o>=</span> <span class=k>new</span> <span class=nb>Date</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 可选：删除不需要的字段
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>delete</span> <span class=nx>doc</span><span class=p>.</span><span class=nx>someTemporaryField</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 批量插入到归档集合
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>if</span> <span class=p>(</span><span class=nx>docsToArchive</span><span class=p>.</span><span class=nx>length</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>db</span><span class=p>.</span><span class=nx>archiveCollection</span><span class=p>.</span><span class=nx>insertMany</span><span class=p>(</span><span class=nx>docsToArchive</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 记录归档数量
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>print</span><span class=p>(</span><span class=sb>`已归档 </span><span class=si>${</span><span class=nx>docsToArchive</span><span class=p>.</span><span class=nx>length</span><span class=si>}</span><span class=sb> 条记录`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=方法三批处理归档处理超大数据集>方法三：批处理归档（处理超大数据集）</h2><p>对于非常大的数据集，可以使用批处理来避免内存问题：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=kr>const</span> <span class=nx>batchSize</span> <span class=o>=</span> <span class=mi>1000</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=nx>query</span> <span class=o>=</span> <span class=p>{</span> <span class=nx>createdDate</span><span class=o>:</span> <span class=p>{</span> <span class=nx>$lt</span><span class=o>:</span> <span class=nx>ISODate</span><span class=p>(</span><span class=s2>&#34;2023-01-01&#34;</span><span class=p>)</span> <span class=p>}</span> <span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=kd>let</span> <span class=nx>totalArchived</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 获取匹配的文档总数（可选）
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>totalToArchive</span> <span class=o>=</span> <span class=nx>db</span><span class=p>.</span><span class=nx>sourceCollection</span><span class=p>.</span><span class=nx>countDocuments</span><span class=p>(</span><span class=nx>query</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=nx>print</span><span class=p>(</span><span class=sb>`需要归档的记录总数: </span><span class=si>${</span><span class=nx>totalToArchive</span><span class=si>}</span><span class=sb>`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 批量处理
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>let</span> <span class=nx>batch</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>do</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 获取一批数据
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>batch</span> <span class=o>=</span> <span class=nx>db</span><span class=p>.</span><span class=nx>sourceCollection</span><span class=p>.</span><span class=nx>find</span><span class=p>(</span><span class=nx>query</span><span class=p>).</span><span class=nx>limit</span><span class=p>(</span><span class=nx>batchSize</span><span class=p>).</span><span class=nx>toArray</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nx>batch</span><span class=p>.</span><span class=nx>length</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// 添加归档时间戳
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=nx>batch</span><span class=p>.</span><span class=nx>forEach</span><span class=p>(</span><span class=nx>doc</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=nx>doc</span><span class=p>.</span><span class=nx>archivedAt</span> <span class=o>=</span> <span class=k>new</span> <span class=nb>Date</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=p>});</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1>// 插入到归档集合
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=nx>db</span><span class=p>.</span><span class=nx>archiveCollection</span><span class=p>.</span><span class=nx>insertMany</span><span class=p>(</span><span class=nx>batch</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1>// 从源集合删除已归档的文档
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=kr>const</span> <span class=nx>ids</span> <span class=o>=</span> <span class=nx>batch</span><span class=p>.</span><span class=nx>map</span><span class=p>(</span><span class=nx>doc</span> <span class=p>=&gt;</span> <span class=nx>doc</span><span class=p>.</span><span class=nx>_id</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=nx>db</span><span class=p>.</span><span class=nx>sourceCollection</span><span class=p>.</span><span class=nx>deleteMany</span><span class=p>({</span> <span class=nx>_id</span><span class=o>:</span> <span class=p>{</span> <span class=nx>$in</span><span class=o>:</span> <span class=nx>ids</span> <span class=p>}</span> <span class=p>});</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=nx>totalArchived</span> <span class=o>+=</span> <span class=nx>batch</span><span class=p>.</span><span class=nx>length</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=nx>print</span><span class=p>(</span><span class=sb>`已处理: </span><span class=si>${</span><span class=nx>totalArchived</span><span class=si>}</span><span class=sb> / </span><span class=si>${</span><span class=nx>totalToArchive</span><span class=si>}</span><span class=sb> 条记录`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=k>while</span> <span class=p>(</span><span class=nx>batch</span><span class=p>.</span><span class=nx>length</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nx>print</span><span class=p>(</span><span class=sb>`归档完成，共归档 </span><span class=si>${</span><span class=nx>totalArchived</span><span class=si>}</span><span class=sb> 条记录`</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=方法四使用原子操作事务归档>方法四：使用原子操作（事务）归档</h2><p>在支持事务的部署（如复制集）中，可以使用事务确保归档过程的原子性：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// 启动会话和事务
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>session</span> <span class=o>=</span> <span class=nx>db</span><span class=p>.</span><span class=nx>getMongo</span><span class=p>().</span><span class=nx>startSession</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=nx>session</span><span class=p>.</span><span class=nx>startTransaction</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>try</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>sourceColl</span> <span class=o>=</span> <span class=nx>session</span><span class=p>.</span><span class=nx>getDatabase</span><span class=p>(</span><span class=s2>&#34;yourDB&#34;</span><span class=p>).</span><span class=nx>sourceCollection</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>archiveColl</span> <span class=o>=</span> <span class=nx>session</span><span class=p>.</span><span class=nx>getDatabase</span><span class=p>(</span><span class=s2>&#34;yourDB&#34;</span><span class=p>).</span><span class=nx>archiveCollection</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 查找需要归档的文档
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kr>const</span> <span class=nx>docsToArchive</span> <span class=o>=</span> <span class=nx>sourceColl</span><span class=p>.</span><span class=nx>find</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span> <span class=nx>createdDate</span><span class=o>:</span> <span class=p>{</span> <span class=nx>$lt</span><span class=o>:</span> <span class=nx>ISODate</span><span class=p>(</span><span class=s2>&#34;2023-01-01&#34;</span><span class=p>)</span> <span class=p>}</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>).</span><span class=nx>toArray</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nx>docsToArchive</span><span class=p>.</span><span class=nx>length</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// 添加归档时间戳
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=nx>docsToArchive</span><span class=p>.</span><span class=nx>forEach</span><span class=p>(</span><span class=nx>doc</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=nx>doc</span><span class=p>.</span><span class=nx>archivedAt</span> <span class=o>=</span> <span class=k>new</span> <span class=nb>Date</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=p>});</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1>// 插入到归档集合
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=nx>archiveColl</span><span class=p>.</span><span class=nx>insertMany</span><span class=p>(</span><span class=nx>docsToArchive</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1>// 从源集合删除
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=kr>const</span> <span class=nx>ids</span> <span class=o>=</span> <span class=nx>docsToArchive</span><span class=p>.</span><span class=nx>map</span><span class=p>(</span><span class=nx>doc</span> <span class=p>=&gt;</span> <span class=nx>doc</span><span class=p>.</span><span class=nx>_id</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=nx>sourceColl</span><span class=p>.</span><span class=nx>deleteMany</span><span class=p>({</span> <span class=nx>_id</span><span class=o>:</span> <span class=p>{</span> <span class=nx>$in</span><span class=o>:</span> <span class=nx>ids</span> <span class=p>}</span> <span class=p>});</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=nx>print</span><span class=p>(</span><span class=sb>`已归档 </span><span class=si>${</span><span class=nx>docsToArchive</span><span class=p>.</span><span class=nx>length</span><span class=si>}</span><span class=sb> 条记录`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 提交事务
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>session</span><span class=p>.</span><span class=nx>commitTransaction</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=k>catch</span> <span class=p>(</span><span class=nx>error</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>print</span><span class=p>(</span><span class=s2>&#34;归档失败: &#34;</span> <span class=o>+</span> <span class=nx>error</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nx>session</span><span class=p>.</span><span class=nx>abortTransaction</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=k>finally</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>session</span><span class=p>.</span><span class=nx>endSession</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=特殊情况基于-objectid>特殊情况（基于 ObjectId）</h2><p>在 MongoDB 中，如果表中没有显式的创建时间字段，但有 <code>_id</code> 字段是 ObjectId 类型，可以利用 ObjectId 中内置的时间戳来查询、管理和删除历史数据。</p><h3 id=objectid-时间戳的原理>ObjectId 时间戳的原理</h3><p>MongoDB 的 ObjectId 是一个 12 字节的标识符，其中前 4 字节代表文档创建时的时间戳（Unix 时间戳，以秒为单位）：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>ObjectId = 时间戳(4字节) + 机器标识(3字节) + 进程ID(2字节) + 计数器(3字节)
+</span></span></code></pre></td></tr></table></div></div><p>这意味着每个 ObjectId 都内置了文档的创建时间。</p><h3 id=查询历史数据>查询历史数据</h3><h4 id=基于-objectid-的时间范围查询>基于 ObjectId 的时间范围查询</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// 查询特定日期之前创建的文档
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>targetDate</span> <span class=o>=</span> <span class=k>new</span> <span class=nb>Date</span><span class=p>(</span><span class=s2>&#34;2023-01-01&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=nx>query</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>_id</span><span class=o>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$lt</span><span class=o>:</span> <span class=nx>ObjectId</span><span class=p>.</span><span class=nx>createFromTime</span><span class=p>(</span><span class=nb>Math</span><span class=p>.</span><span class=nx>floor</span><span class=p>(</span><span class=nx>targetDate</span><span class=p>.</span><span class=nx>getTime</span><span class=p>()</span> <span class=o>/</span> <span class=mi>1000</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 执行查询
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>historicalDocs</span> <span class=o>=</span> <span class=nx>db</span><span class=p>.</span><span class=nx>yourCollection</span><span class=p>.</span><span class=nx>find</span><span class=p>(</span><span class=nx>query</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 计算符合条件的文档数量
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>count</span> <span class=o>=</span> <span class=nx>db</span><span class=p>.</span><span class=nx>yourCollection</span><span class=p>.</span><span class=nx>countDocuments</span><span class=p>(</span><span class=nx>query</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=nx>print</span><span class=p>(</span><span class=sb>`历史数据数量: </span><span class=si>${</span><span class=nx>count</span><span class=si>}</span><span class=sb>`</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=提取-objectid-的创建时间>提取 ObjectId 的创建时间</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// 查看文档的实际创建时间
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nx>db</span><span class=p>.</span><span class=nx>yourCollection</span><span class=p>.</span><span class=nx>find</span><span class=p>().</span><span class=nx>forEach</span><span class=p>(</span><span class=nx>doc</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>timestamp</span> <span class=o>=</span> <span class=nx>doc</span><span class=p>.</span><span class=nx>_id</span><span class=p>.</span><span class=nx>getTimestamp</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=nx>print</span><span class=p>(</span><span class=sb>`文档ID: </span><span class=si>${</span><span class=nx>doc</span><span class=p>.</span><span class=nx>_id</span><span class=si>}</span><span class=sb>, 创建时间: </span><span class=si>${</span><span class=nx>timestamp</span><span class=si>}</span><span class=sb>`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=归档历史数据>归档历史数据</h3><h4 id=基于-objectid-时间归档数据>基于 ObjectId 时间归档数据</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// 定义时间边界
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>cutoffDate</span> <span class=o>=</span> <span class=k>new</span> <span class=nb>Date</span><span class=p>(</span><span class=s2>&#34;2023-01-01&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=nx>cutoffTimestamp</span> <span class=o>=</span> <span class=nb>Math</span><span class=p>.</span><span class=nx>floor</span><span class=p>(</span><span class=nx>cutoffDate</span><span class=p>.</span><span class=nx>getTime</span><span class=p>()</span> <span class=o>/</span> <span class=mi>1000</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=nx>query</span> <span class=o>=</span> <span class=p>{</span> <span class=nx>_id</span><span class=o>:</span> <span class=p>{</span> <span class=nx>$lt</span><span class=o>:</span> <span class=nx>ObjectId</span><span class=p>.</span><span class=nx>createFromTime</span><span class=p>(</span><span class=nx>cutoffTimestamp</span><span class=p>)</span> <span class=p>}</span> <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 归档操作
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>batchSize</span> <span class=o>=</span> <span class=mi>1000</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=kd>let</span> <span class=nx>totalArchived</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 分批处理
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>let</span> <span class=nx>batch</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>do</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 获取一批数据
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>batch</span> <span class=o>=</span> <span class=nx>db</span><span class=p>.</span><span class=nx>sourceCollection</span><span class=p>.</span><span class=nx>find</span><span class=p>(</span><span class=nx>query</span><span class=p>).</span><span class=nx>limit</span><span class=p>(</span><span class=nx>batchSize</span><span class=p>).</span><span class=nx>toArray</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nx>batch</span><span class=p>.</span><span class=nx>length</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=c1>// 添加归档时间字段(可选)
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=nx>batch</span><span class=p>.</span><span class=nx>forEach</span><span class=p>(</span><span class=nx>doc</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 从ObjectId提取原始创建时间
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=nx>doc</span><span class=p>.</span><span class=nx>originalCreationTime</span> <span class=o>=</span> <span class=nx>doc</span><span class=p>.</span><span class=nx>_id</span><span class=p>.</span><span class=nx>getTimestamp</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>            <span class=c1>// 添加归档时间
+</span></span></span><span class=line><span class=cl><span class=c1></span>            <span class=nx>doc</span><span class=p>.</span><span class=nx>archivedAt</span> <span class=o>=</span> <span class=k>new</span> <span class=nb>Date</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=p>});</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1>// 插入到归档集合
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=nx>db</span><span class=p>.</span><span class=nx>archiveCollection</span><span class=p>.</span><span class=nx>insertMany</span><span class=p>(</span><span class=nx>batch</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=c1>// 从源集合删除已归档的文档
+</span></span></span><span class=line><span class=cl><span class=c1></span>        <span class=kr>const</span> <span class=nx>ids</span> <span class=o>=</span> <span class=nx>batch</span><span class=p>.</span><span class=nx>map</span><span class=p>(</span><span class=nx>doc</span> <span class=p>=&gt;</span> <span class=nx>doc</span><span class=p>.</span><span class=nx>_id</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=nx>db</span><span class=p>.</span><span class=nx>sourceCollection</span><span class=p>.</span><span class=nx>deleteMany</span><span class=p>({</span> <span class=nx>_id</span><span class=o>:</span> <span class=p>{</span> <span class=nx>$in</span><span class=o>:</span> <span class=nx>ids</span> <span class=p>}</span> <span class=p>});</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=nx>totalArchived</span> <span class=o>+=</span> <span class=nx>batch</span><span class=p>.</span><span class=nx>length</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=nx>print</span><span class=p>(</span><span class=sb>`已归档: </span><span class=si>${</span><span class=nx>totalArchived</span><span class=si>}</span><span class=sb> 条记录`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=k>while</span> <span class=p>(</span><span class=nx>batch</span><span class=p>.</span><span class=nx>length</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nx>print</span><span class=p>(</span><span class=sb>`归档完成，共归档 </span><span class=si>${</span><span class=nx>totalArchived</span><span class=si>}</span><span class=sb> 条记录`</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=删除历史数据>删除历史数据</h3><h4 id=直接删除特定时间前的数据>直接删除特定时间前的数据</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// 删除2022年之前的所有数据
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>deleteDate</span> <span class=o>=</span> <span class=k>new</span> <span class=nb>Date</span><span class=p>(</span><span class=s2>&#34;2022-01-01&#34;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=nx>deleteQuery</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>_id</span><span class=o>:</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>$lt</span><span class=o>:</span> <span class=nx>ObjectId</span><span class=p>.</span><span class=nx>createFromTime</span><span class=p>(</span><span class=nb>Math</span><span class=p>.</span><span class=nx>floor</span><span class=p>(</span><span class=nx>deleteDate</span><span class=p>.</span><span class=nx>getTime</span><span class=p>()</span> <span class=o>/</span> <span class=mi>1000</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 执行删除前先确认删除数量
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>countToDelete</span> <span class=o>=</span> <span class=nx>db</span><span class=p>.</span><span class=nx>yourCollection</span><span class=p>.</span><span class=nx>countDocuments</span><span class=p>(</span><span class=nx>deleteQuery</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=nx>print</span><span class=p>(</span><span class=sb>`将要删除 </span><span class=si>${</span><span class=nx>countToDelete</span><span class=si>}</span><span class=sb> 条记录`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 执行删除操作
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>result</span> <span class=o>=</span> <span class=nx>db</span><span class=p>.</span><span class=nx>yourCollection</span><span class=p>.</span><span class=nx>deleteMany</span><span class=p>(</span><span class=nx>deleteQuery</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=nx>print</span><span class=p>(</span><span class=sb>`已删除 </span><span class=si>${</span><span class=nx>result</span><span class=p>.</span><span class=nx>deletedCount</span><span class=si>}</span><span class=sb> 条记录`</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=规范化历史数据管理>规范化历史数据管理</h3><h4 id=1-添加显式的创建时间字段>1. 添加显式的创建时间字段</h4><p>将隐含在 ObjectId 中的时间提取出来，作为显式字段：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// 为所有文档添加一个显式的createdAt字段
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nx>db</span><span class=p>.</span><span class=nx>yourCollection</span><span class=p>.</span><span class=nx>find</span><span class=p>().</span><span class=nx>forEach</span><span class=p>(</span><span class=nx>doc</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>db</span><span class=p>.</span><span class=nx>yourCollection</span><span class=p>.</span><span class=nx>updateOne</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span> <span class=nx>_id</span><span class=o>:</span> <span class=nx>doc</span><span class=p>.</span><span class=nx>_id</span> <span class=p>},</span>
+</span></span><span class=line><span class=cl>        <span class=p>{</span> <span class=nx>$set</span><span class=o>:</span> <span class=p>{</span> <span class=nx>createdAt</span><span class=o>:</span> <span class=nx>doc</span><span class=p>.</span><span class=nx>_id</span><span class=p>.</span><span class=nx>getTimestamp</span><span class=p>()</span> <span class=p>}</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 为新的createdAt字段创建索引
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nx>db</span><span class=p>.</span><span class=nx>yourCollection</span><span class=p>.</span><span class=nx>createIndex</span><span class=p>({</span> <span class=nx>createdAt</span><span class=o>:</span> <span class=mi>1</span> <span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=2-创建数据管理脚本>2. 创建数据管理脚本</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// 创建一个定期运行的归档脚本
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>function</span> <span class=nx>archiveOldRecords</span><span class=p>(</span><span class=nx>ageInDays</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>cutoffDate</span> <span class=o>=</span> <span class=k>new</span> <span class=nb>Date</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=nx>cutoffDate</span><span class=p>.</span><span class=nx>setDate</span><span class=p>(</span><span class=nx>cutoffDate</span><span class=p>.</span><span class=nx>getDate</span><span class=p>()</span> <span class=o>-</span> <span class=nx>ageInDays</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>cutoffTimestamp</span> <span class=o>=</span> <span class=nb>Math</span><span class=p>.</span><span class=nx>floor</span><span class=p>(</span><span class=nx>cutoffDate</span><span class=p>.</span><span class=nx>getTime</span><span class=p>()</span> <span class=o>/</span> <span class=mi>1000</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>query</span> <span class=o>=</span> <span class=p>{</span> 
+</span></span><span class=line><span class=cl>        <span class=nx>_id</span><span class=o>:</span> <span class=p>{</span> <span class=nx>$lt</span><span class=o>:</span> <span class=nx>ObjectId</span><span class=p>.</span><span class=nx>createFromTime</span><span class=p>(</span><span class=nx>cutoffTimestamp</span><span class=p>)</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=nx>print</span><span class=p>(</span><span class=sb>`开始归档 </span><span class=si>${</span><span class=nx>ageInDays</span><span class=si>}</span><span class=sb> 天前的数据...`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 添加批处理逻辑...
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=c1>// 参考上面的归档代码
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 示例用法: 归档90天前的数据
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nx>archiveOldRecords</span><span class=p>(</span><span class=mi>90</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=3-实施数据生命周期策略>3. 实施数据生命周期策略</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// 在归档集合上设置TTL索引，例如保留一年后自动删除
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nx>db</span><span class=p>.</span><span class=nx>archiveCollection</span><span class=p>.</span><span class=nx>createIndex</span><span class=p>(</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span> <span class=nx>archivedAt</span><span class=o>:</span> <span class=mi>1</span> <span class=p>},</span>
+</span></span><span class=line><span class=cl>    <span class=p>{</span> <span class=nx>expireAfterSeconds</span><span class=o>:</span> <span class=mi>31536000</span> <span class=p>}</span> <span class=c1>// 一年
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=4-创建数据统计分析脚本>4. 创建数据统计分析脚本</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// 按月份统计数据量
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>function</span> <span class=nx>analyzeDataByMonth</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>stats</span> <span class=o>=</span> <span class=p>{};</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=nx>db</span><span class=p>.</span><span class=nx>yourCollection</span><span class=p>.</span><span class=nx>find</span><span class=p>().</span><span class=nx>forEach</span><span class=p>(</span><span class=nx>doc</span> <span class=p>=&gt;</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kr>const</span> <span class=nx>createTime</span> <span class=o>=</span> <span class=nx>doc</span><span class=p>.</span><span class=nx>_id</span><span class=p>.</span><span class=nx>getTimestamp</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>        <span class=kr>const</span> <span class=nx>yearMonth</span> <span class=o>=</span> <span class=sb>`</span><span class=si>${</span><span class=nx>createTime</span><span class=p>.</span><span class=nx>getFullYear</span><span class=p>()</span><span class=si>}</span><span class=sb>-</span><span class=si>${</span><span class=p>(</span><span class=nx>createTime</span><span class=p>.</span><span class=nx>getMonth</span><span class=p>()</span> <span class=o>+</span> <span class=mi>1</span><span class=p>).</span><span class=nx>toString</span><span class=p>().</span><span class=nx>padStart</span><span class=p>(</span><span class=mi>2</span><span class=p>,</span> <span class=s1>&#39;0&#39;</span><span class=p>)</span><span class=si>}</span><span class=sb>`</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=nx>stats</span><span class=p>[</span><span class=nx>yearMonth</span><span class=p>])</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>            <span class=nx>stats</span><span class=p>[</span><span class=nx>yearMonth</span><span class=p>]</span> <span class=o>=</span> <span class=mi>0</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>        <span class=p>}</span>
+</span></span><span class=line><span class=cl>        <span class=nx>stats</span><span class=p>[</span><span class=nx>yearMonth</span><span class=p>]</span><span class=o>++</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>    <span class=p>});</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 打印统计结果
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>for</span> <span class=p>(</span><span class=kr>const</span> <span class=p>[</span><span class=nx>month</span><span class=p>,</span> <span class=nx>count</span><span class=p>]</span> <span class=k>of</span> <span class=nb>Object</span><span class=p>.</span><span class=nx>entries</span><span class=p>(</span><span class=nx>stats</span><span class=p>).</span><span class=nx>sort</span><span class=p>())</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>print</span><span class=p>(</span><span class=sb>`</span><span class=si>${</span><span class=nx>month</span><span class=si>}</span><span class=sb>: </span><span class=si>${</span><span class=nx>count</span><span class=si>}</span><span class=sb> 条记录`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nx>analyzeDataByMonth</span><span class=p>();</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=最佳实践和注意事项>最佳实践和注意事项</h2><ol><li><p><strong>性能考虑</strong>：对大型集合执行基于 ObjectId 的范围查询可能很慢，确保有适当的索引</p></li><li><p><strong>备份</strong>：在执行大规模删除操作前先备份数据</p></li><li><p><strong>转向显式时间字段</strong>：考虑在应用程序层添加显式的创建时间字段，以便未来更容易管理</p></li><li><p><strong>时区问题</strong>：ObjectId 时间戳基于 UTC，在显示或比较时需注意时区转换</p></li><li><p><strong>批量处理</strong>：处理大量数据时使用批处理方法，避免内存问题</p></li><li><p><strong>日志记录</strong>：为所有数据管理操作保留详细日志，特别是批量删除和归档操作</p></li><li><p><strong>设置TTL索引</strong>：如果归档数据只需保留一段时间，考虑使用TTL索引自动清理</p></li></ol></div><div class=post-copyright><p class=copyright-item><span class=item-title>文章作者</span>
+<span class=item-content>Chen Guixian</span></p><p class=copyright-item><span class=item-title>上次更新</span>
+<span class=item-content>2025-07-17</span></p></div><footer class=post-footer><nav class=post-nav><a class=prev href=/post/mongodb/mongodb-delete-data/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">MongoDB 删除数据方案</span>
+<span class="prev-text nav-mobile">上一篇</span>
+</a><a class=next href=/post/misc/insomnia-switch-env/><span class="next-text nav-default">如何在 Insomnia 中实现不同环境变量的快速切换？</span>
+<span class="next-text nav-mobile">下一篇</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links></div><div class=copyright><span class=power-by>由 <a class=hexo-link href=https://gohugo.io>Hugo</a> 强力驱动
+</span><span class=division>|</span>
+<span class=theme-info>主题 -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a>
+</span><span class=copyright-year>&copy;
+2017 -
+2025<span class=heart><i class="iconfont icon-heart"></i></span><span>Chen Guixian</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script><script type=text/javascript src=/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js></script><script async src="https://www.googletagmanager.com/gtag/js?id=G-T2MFM23ZJM"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-T2MFM23ZJM")}</script></body></html>

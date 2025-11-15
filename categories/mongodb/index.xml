@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>MongoDB on Guixian 的日常记录</title><link>https://blog.chenguixian.com/categories/mongodb/</link><description>Recent content in MongoDB on Guixian 的日常记录</description><generator>Hugo</generator><language>zh-cn</language><lastBuildDate>Sun, 02 Nov 2025 22:28:04 +0800</lastBuildDate><atom:link href="https://blog.chenguixian.com/categories/mongodb/index.xml" rel="self" type="application/rss+xml"/><item><title>MongoDB 孤儿文档介绍与清理指南</title><link>https://blog.chenguixian.com/post/mongodb/mongodb-orphaned-documents-check-and-cleanup-guide/</link><pubDate>Sun, 02 Nov 2025 10:28:04 +0800</pubDate><guid>https://blog.chenguixian.com/post/mongodb/mongodb-orphaned-documents-check-and-cleanup-guide/</guid><description>&lt;h2 id="什么是孤儿文档">什么是孤儿文档&lt;/h2>
+&lt;p>在MongoDB分片集群中，孤儿文档（Orphaned Document）是指那些存在于某个分片上但不应该存在于该分片上的文档。这些文档对应用程序是不可见的，因为MongoDB的路由服务（mongos）不会将查询路由到包含这些文档的分片。&lt;/p></description></item><item><title>MongoDB 删除数据方案</title><link>https://blog.chenguixian.com/post/mongodb/mongodb-delete-data/</link><pubDate>Sat, 19 Jul 2025 22:28:04 +0800</pubDate><guid>https://blog.chenguixian.com/post/mongodb/mongodb-delete-data/</guid><description>&lt;p>我们在日常运营中会积累大量的数据，有时候需要把这些数据归档。&lt;/p>
+&lt;p>对于MongoDB来说，如果要快速删除大量数据，这里有几种方法可以考虑：&lt;/p>
+&lt;h2 id="1-deletemany---基础方案">1 deleteMany() - 基础方案&lt;/h2>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;span class="lnt">8
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">// 基本用法
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">db.collection.deleteMany({ status: &amp;#34;inactive&amp;#34; })
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">// 带条件删除
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">db.collection.deleteMany({ 
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> createdAt: { $lt: new Date(&amp;#34;2023-01-01&amp;#34;) },
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> status: { $in: [&amp;#34;deleted&amp;#34;, &amp;#34;expired&amp;#34;] }
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">})
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>优点：&lt;/strong>&lt;/p></description></item><item><title>MongoDB Shell 数据归档指南：将大表数据归档到另一表</title><link>https://blog.chenguixian.com/post/mongodb/mongodb-archive-large-collection-data/</link><pubDate>Thu, 17 Jul 2025 22:28:04 +0800</pubDate><guid>https://blog.chenguixian.com/post/mongodb/mongodb-archive-large-collection-data/</guid><description>&lt;p>将大表中的部分数据归档到另一个表是数据管理的常见需求，特别是对于需要保持主表性能同时又需要保留历史数据的情况。&lt;/p>
+&lt;p>下面介绍 MongoDB Shell 中实现数据归档的几种方法：&lt;/p></description></item></channel></rss>

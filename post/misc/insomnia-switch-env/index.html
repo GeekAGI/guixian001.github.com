@@ -1,0 +1,294 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1"><title>如何在 Insomnia 中实现不同环境变量的快速切换？ - Guixian 的日常记录</title>
+<meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=Cache-Control content="no-transform"><meta http-equiv=Cache-Control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Chen Guixian"><meta name=description content="Insomnia 是一个开源的跨平台 REST API 客户端，它支持 GraphQL、REST、WebSockets、服务器发送事件（SSE）、gRPC 以及任何其他与 HTTP 兼容的协议。是一个不错的 PostMan 替代品。
+"><meta name=keywords content="程序员的日常记录,编码人生,生活笔记"><meta name=generator content="Hugo 0.134.3 with theme even"><link rel=canonical href=https://blog.chenguixian.com/post/misc/insomnia-switch-env/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link href=/sass/main.min.da774276428e8a6854e28c9290a6dfdbe7a5a343455f0a76358a2f66d0a56366.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:url" content="https://blog.chenguixian.com/post/misc/insomnia-switch-env/"><meta property="og:site_name" content="Guixian 的日常记录"><meta property="og:title" content="如何在 Insomnia 中实现不同环境变量的快速切换？"><meta property="og:description" content="Insomnia 是一个开源的跨平台 REST API 客户端，它支持 GraphQL、REST、WebSockets、服务器发送事件（SSE）、gRPC 以及任何其他与 HTTP 兼容的协议。是一个不错的 PostMan 替代品。"><meta property="og:locale" content="zh_cn"><meta property="og:type" content="article"><meta property="article:section" content="post"><meta property="article:published_time" content="2025-03-12T21:31:26+08:00"><meta property="article:modified_time" content="2025-03-12T21:31:26+08:00"><meta property="article:tag" content="Insomnia"><meta itemprop=name content="如何在 Insomnia 中实现不同环境变量的快速切换？"><meta itemprop=description content="Insomnia 是一个开源的跨平台 REST API 客户端，它支持 GraphQL、REST、WebSockets、服务器发送事件（SSE）、gRPC 以及任何其他与 HTTP 兼容的协议。是一个不错的 PostMan 替代品。"><meta itemprop=datePublished content="2025-03-12T21:31:26+08:00"><meta itemprop=dateModified content="2025-03-12T21:31:26+08:00"><meta itemprop=wordCount content="1368"><meta itemprop=keywords content="Insomnia"><meta name=twitter:card content="summary"><meta name=twitter:title content="如何在 Insomnia 中实现不同环境变量的快速切换？"><meta name=twitter:description content="Insomnia 是一个开源的跨平台 REST API 客户端，它支持 GraphQL、REST、WebSockets、服务器发送事件（SSE）、gRPC 以及任何其他与 HTTP 兼容的协议。是一个不错的 PostMan 替代品。"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script><script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>Guixian 的日常记录</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/><li class=mobile-menu-item>Home</li></a><a href=/post/><li class=mobile-menu-item>Archives</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>Guixian 的日常记录</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/>Home</a></li><li class=menu-item><a class=menu-item-link href=/post/>Archives</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>如何在 Insomnia 中实现不同环境变量的快速切换？</h1><div class=post-meta><span class=post-time>2025-03-12</span></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>文章目录</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><ul><li><a href=#1-创建和管理-global-environments>1 创建和管理 Global Environments</a></li><li><a href=#2-为不同环境设置不同的-globals>2 为不同环境设置不同的 Globals</a><ul><li></li></ul></li><li><a href=#3-在脚本中根据环境动态设置-token>3 在脚本中根据环境动态设置 Token</a><ul><li></li></ul></li><li><a href=#4-环境感知的-token-验证>4 环境感知的 Token 验证</a><ul><li></li></ul></li><li><a href=#5-环境切换的最佳实践>5 环境切换的最佳实践</a><ul><li></li></ul></li><li><a href=#6-在请求中使用环境变量>6 在请求中使用环境变量</a><ul><li></li></ul></li><li><a href=#7-高级用法自动环境检测>7 高级用法：自动环境检测</a></li><li><a href=#总结>总结</a></li></ul></li></ul></nav></div></div><div class=post-content><p>Insomnia 是一个开源的跨平台 REST API 客户端，它支持 GraphQL、REST、WebSockets、服务器发送事件（SSE）、gRPC 以及任何其他与 HTTP 兼容的协议。是一个不错的 PostMan 替代品。</p><p>比如我们存在如下场景：</p><ol><li>存在不同环境的 API，比如开放、测试、预发布、正式环境&mldr;</li><li>各个环境的 API 请求路径、参数定义这些都是一致的</li><li>不同环境需要使用不同的 API 入口、 Token。</li></ol><p>本文描述如何借助 Insomnia 的 Environments 配置来实现不同环境间的管理。</p><h2 id=1-创建和管理-global-environments>1 创建和管理 Global Environments</h2><ol><li><p><strong>访问 Global Environments</strong>：</p><ul><li>点击左下角的环境选择器</li><li>选择 &ldquo;Manage Environments&rdquo;</li><li>在弹出的窗口中可以看到 &ldquo;Global Environments&rdquo; 选项</li></ul></li><li><p><strong>创建不同的 Global Environment</strong>：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>├── Development Global
+</span></span><span class=line><span class=cl>├── Testing Global
+</span></span><span class=line><span class=cl>├── Production Global
+</span></span><span class=line><span class=cl>└── Staging Global
+</span></span></code></pre></td></tr></table></div></div></li></ol><h2 id=2-为不同环境设置不同的-globals>2 为不同环境设置不同的 Globals</h2><p>比如我们设置如下的环境的全局变量，这里可以根据自身的场景进行设置。</p><h4 id=development-global-environment>Development Global Environment</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;auth_base_url&#34;</span><span class=p>:</span> <span class=s2>&#34;https://dev-auth.example.com&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;api_base_url&#34;</span><span class=p>:</span> <span class=s2>&#34;https://dev-api.example.com&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;auth_token&#34;</span><span class=p>:</span> <span class=s2>&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;token_expires_at&#34;</span><span class=p>:</span> <span class=s2>&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;environment_name&#34;</span><span class=p>:</span> <span class=s2>&#34;development&#34;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h4 id=production-global-environment>Production Global Environment</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span><span class=lnt>6
+</span><span class=lnt>7
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;auth_base_url&#34;</span><span class=p>:</span> <span class=s2>&#34;https://auth.example.com&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;api_base_url&#34;</span><span class=p>:</span> <span class=s2>&#34;https://api.example.com&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;auth_token&#34;</span><span class=p>:</span> <span class=s2>&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;token_expires_at&#34;</span><span class=p>:</span> <span class=s2>&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>  <span class=nt>&#34;environment_name&#34;</span><span class=p>:</span> <span class=s2>&#34;production&#34;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=3-在脚本中根据环境动态设置-token>3 在脚本中根据环境动态设置 Token</h2><h4 id=登录接口的-response-script>登录接口的 Response Script</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=kr>const</span> <span class=nx>response</span> <span class=o>=</span> <span class=nx>insomnia</span><span class=p>.</span><span class=nx>response</span><span class=p>.</span><span class=nx>getBody</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=nx>responseData</span> <span class=o>=</span> <span class=nx>JSON</span><span class=p>.</span><span class=nx>parse</span><span class=p>(</span><span class=nx>response</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 获取当前环境名称
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>currentEnv</span> <span class=o>=</span> <span class=nx>insomnia</span><span class=p>.</span><span class=nx>globals</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;environment_name&#39;</span><span class=p>)</span> <span class=o>||</span> <span class=s1>&#39;unknown&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=nx>responseData</span><span class=p>.</span><span class=nx>access_token</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 根据环境保存 token
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>insomnia</span><span class=p>.</span><span class=nx>globals</span><span class=p>.</span><span class=nx>set</span><span class=p>(</span><span class=s1>&#39;auth_token&#39;</span><span class=p>,</span> <span class=nx>responseData</span><span class=p>.</span><span class=nx>access_token</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nx>responseData</span><span class=p>.</span><span class=nx>expires_in</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=kr>const</span> <span class=nx>expiresAt</span> <span class=o>=</span> <span class=nb>Date</span><span class=p>.</span><span class=nx>now</span><span class=p>()</span> <span class=o>+</span> <span class=p>(</span><span class=nx>responseData</span><span class=p>.</span><span class=nx>expires_in</span> <span class=o>*</span> <span class=mi>1000</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=nx>insomnia</span><span class=p>.</span><span class=nx>globals</span><span class=p>.</span><span class=nx>set</span><span class=p>(</span><span class=s1>&#39;token_expires_at&#39;</span><span class=p>,</span> <span class=nx>expiresAt</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1>// 保存用户信息（如果需要）
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=k>if</span> <span class=p>(</span><span class=nx>responseData</span><span class=p>.</span><span class=nx>user</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>insomnia</span><span class=p>.</span><span class=nx>globals</span><span class=p>.</span><span class=nx>set</span><span class=p>(</span><span class=s1>&#39;current_user&#39;</span><span class=p>,</span> <span class=nx>JSON</span><span class=p>.</span><span class=nx>stringify</span><span class=p>(</span><span class=nx>responseData</span><span class=p>.</span><span class=nx>user</span><span class=p>));</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=sb>`Token 已保存到 </span><span class=si>${</span><span class=nx>currentEnv</span><span class=si>}</span><span class=sb> 环境的 Globals`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s1>&#39;Token:&#39;</span><span class=p>,</span> <span class=nx>responseData</span><span class=p>.</span><span class=nx>access_token</span><span class=p>.</span><span class=nx>substring</span><span class=p>(</span><span class=mi>0</span><span class=p>,</span> <span class=mi>20</span><span class=p>)</span> <span class=o>+</span> <span class=s1>&#39;...&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=sb>`在 </span><span class=si>${</span><span class=nx>currentEnv</span><span class=si>}</span><span class=sb> 环境中登录失败`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=4-环境感知的-token-验证>4 环境感知的 Token 验证</h2><h4 id=pre-request-script-示例>Pre-request Script 示例</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// 检查当前环境
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>currentEnv</span> <span class=o>=</span> <span class=nx>insomnia</span><span class=p>.</span><span class=nx>globals</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;environment_name&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=nx>baseUrl</span> <span class=o>=</span> <span class=nx>insomnia</span><span class=p>.</span><span class=nx>globals</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;api_base_url&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=nx>token</span> <span class=o>=</span> <span class=nx>insomnia</span><span class=p>.</span><span class=nx>globals</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;auth_token&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=kr>const</span> <span class=nx>expiresAt</span> <span class=o>=</span> <span class=nx>insomnia</span><span class=p>.</span><span class=nx>globals</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;token_expires_at&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=sb>`当前环境: </span><span class=si>${</span><span class=nx>currentEnv</span><span class=si>}</span><span class=sb>`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=sb>`API 基础 URL: </span><span class=si>${</span><span class=nx>baseUrl</span><span class=si>}</span><span class=sb>`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 验证 token
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=nx>token</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=k>throw</span> <span class=k>new</span> <span class=nb>Error</span><span class=p>(</span><span class=sb>`在 </span><span class=si>${</span><span class=nx>currentEnv</span><span class=si>}</span><span class=sb> 环境中未找到 auth token`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 检查过期时间
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>if</span> <span class=p>(</span><span class=nx>expiresAt</span> <span class=o>&amp;&amp;</span> <span class=nb>Date</span><span class=p>.</span><span class=nx>now</span><span class=p>()</span> <span class=o>&gt;</span> <span class=nx>expiresAt</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=sb>`</span><span class=si>${</span><span class=nx>currentEnv</span><span class=si>}</span><span class=sb> 环境中的 token 已过期`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>throw</span> <span class=k>new</span> <span class=nb>Error</span><span class=p>(</span><span class=s1>&#39;Token 已过期，请重新登录&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 动态设置请求 URL（如果需要）
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>currentUrl</span> <span class=o>=</span> <span class=nx>insomnia</span><span class=p>.</span><span class=nx>request</span><span class=p>.</span><span class=nx>getUrl</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=nx>currentUrl</span><span class=p>.</span><span class=nx>startsWith</span><span class=p>(</span><span class=s1>&#39;http&#39;</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 如果是相对路径，添加环境对应的基础 URL
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>insomnia</span><span class=p>.</span><span class=nx>request</span><span class=p>.</span><span class=nx>setUrl</span><span class=p>(</span><span class=nx>baseUrl</span> <span class=o>+</span> <span class=nx>currentUrl</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=sb>`使用 </span><span class=si>${</span><span class=nx>currentEnv</span><span class=si>}</span><span class=sb> 环境的 token 进行请求`</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=5-环境切换的最佳实践>5 环境切换的最佳实践</h2><h4 id=创建环境检查脚本>创建环境检查脚本</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// 可以在多个请求中复用的环境检查函数
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>function</span> <span class=nx>validateEnvironment</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>envName</span> <span class=o>=</span> <span class=nx>insomnia</span><span class=p>.</span><span class=nx>globals</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;environment_name&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>authUrl</span> <span class=o>=</span> <span class=nx>insomnia</span><span class=p>.</span><span class=nx>globals</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;auth_base_url&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>apiUrl</span> <span class=o>=</span> <span class=nx>insomnia</span><span class=p>.</span><span class=nx>globals</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;api_base_url&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=nx>envName</span> <span class=o>||</span> <span class=o>!</span><span class=nx>authUrl</span> <span class=o>||</span> <span class=o>!</span><span class=nx>apiUrl</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>throw</span> <span class=k>new</span> <span class=nb>Error</span><span class=p>(</span><span class=s1>&#39;Global Environment 配置不完整，请检查环境设置&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=sb>`✓ 当前使用 </span><span class=si>${</span><span class=nx>envName</span><span class=si>}</span><span class=sb> 环境`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=sb>`✓ Auth URL: </span><span class=si>${</span><span class=nx>authUrl</span><span class=si>}</span><span class=sb>`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=sb>`✓ API URL: </span><span class=si>${</span><span class=nx>apiUrl</span><span class=si>}</span><span class=sb>`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>name</span><span class=o>:</span> <span class=nx>envName</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>authUrl</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>apiUrl</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kd>function</span> <span class=nx>getEnvironmentToken</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>env</span> <span class=o>=</span> <span class=nx>validateEnvironment</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>token</span> <span class=o>=</span> <span class=nx>insomnia</span><span class=p>.</span><span class=nx>globals</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;auth_token&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>expiresAt</span> <span class=o>=</span> <span class=nx>insomnia</span><span class=p>.</span><span class=nx>globals</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;token_expires_at&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=o>!</span><span class=nx>token</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>throw</span> <span class=k>new</span> <span class=nb>Error</span><span class=p>(</span><span class=sb>`</span><span class=si>${</span><span class=nx>env</span><span class=p>.</span><span class=nx>name</span><span class=si>}</span><span class=sb> 环境中未找到认证 token`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nx>expiresAt</span> <span class=o>&amp;&amp;</span> <span class=nb>Date</span><span class=p>.</span><span class=nx>now</span><span class=p>()</span> <span class=o>&gt;</span> <span class=nx>expiresAt</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=k>throw</span> <span class=k>new</span> <span class=nb>Error</span><span class=p>(</span><span class=sb>`</span><span class=si>${</span><span class=nx>env</span><span class=p>.</span><span class=nx>name</span><span class=si>}</span><span class=sb> 环境中的 token 已过期`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=nx>token</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 使用示例
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>token</span> <span class=o>=</span> <span class=nx>getEnvironmentToken</span><span class=p>();</span>
+</span></span><span class=line><span class=cl><span class=nx>insomnia</span><span class=p>.</span><span class=nx>request</span><span class=p>.</span><span class=nx>setHeader</span><span class=p>(</span><span class=s1>&#39;Authorization&#39;</span><span class=p>,</span> <span class=sb>`Bearer </span><span class=si>${</span><span class=nx>token</span><span class=si>}</span><span class=sb>`</span><span class=p>);</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=6-在请求中使用环境变量>6 在请求中使用环境变量</h2><h4 id=url-中使用>URL 中使用</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>{{ globals.api_base_url }}/users/profile
+</span></span></code></pre></td></tr></table></div></div><h4 id=header-中使用>Header 中使用</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>Authorization: Bearer {{ globals.auth_token }}
+</span></span><span class=line><span class=cl>X-Environment: {{ globals.environment_name }}
+</span></span></code></pre></td></tr></table></div></div><h4 id=request-body-中使用>Request Body 中使用</h4><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span><span class=lnt>4
+</span><span class=lnt>5
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-json data-lang=json><span class=line><span class=cl><span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;environment&#34;</span><span class=p>:</span> <span class=s2>&#34;{{ globals.environment_name }}&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;token&#34;</span><span class=p>:</span> <span class=s2>&#34;{{ globals.auth_token }}&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>    <span class=nt>&#34;base_url&#34;</span><span class=p>:</span> <span class=s2>&#34;{{ globals.api_base_url }}&#34;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=7-高级用法自动环境检测>7 高级用法：自动环境检测</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// 根据请求 URL 自动检测并切换环境
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kr>const</span> <span class=nx>currentUrl</span> <span class=o>=</span> <span class=nx>insomnia</span><span class=p>.</span><span class=nx>request</span><span class=p>.</span><span class=nx>getUrl</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kd>let</span> <span class=nx>targetEnv</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=nx>currentUrl</span><span class=p>.</span><span class=nx>includes</span><span class=p>(</span><span class=s1>&#39;dev-&#39;</span><span class=p>)</span> <span class=o>||</span> <span class=nx>currentUrl</span><span class=p>.</span><span class=nx>includes</span><span class=p>(</span><span class=s1>&#39;development&#39;</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>targetEnv</span> <span class=o>=</span> <span class=s1>&#39;development&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=nx>currentUrl</span><span class=p>.</span><span class=nx>includes</span><span class=p>(</span><span class=s1>&#39;test-&#39;</span><span class=p>)</span> <span class=o>||</span> <span class=nx>currentUrl</span><span class=p>.</span><span class=nx>includes</span><span class=p>(</span><span class=s1>&#39;staging&#39;</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>targetEnv</span> <span class=o>=</span> <span class=s1>&#39;testing&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span> <span class=k>else</span> <span class=k>if</span> <span class=p>(</span><span class=nx>currentUrl</span><span class=p>.</span><span class=nx>includes</span><span class=p>(</span><span class=s1>&#39;prod-&#39;</span><span class=p>)</span> <span class=o>||</span> <span class=nx>currentUrl</span><span class=p>.</span><span class=nx>includes</span><span class=p>(</span><span class=s1>&#39;production&#39;</span><span class=p>))</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>targetEnv</span> <span class=o>=</span> <span class=s1>&#39;production&#39;</span><span class=p>;</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=p>(</span><span class=nx>targetEnv</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kr>const</span> <span class=nx>currentEnv</span> <span class=o>=</span> <span class=nx>insomnia</span><span class=p>.</span><span class=nx>globals</span><span class=p>.</span><span class=nx>get</span><span class=p>(</span><span class=s1>&#39;environment_name&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nx>currentEnv</span> <span class=o>!==</span> <span class=nx>targetEnv</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=sb>`检测到环境不匹配，当前: </span><span class=si>${</span><span class=nx>currentEnv</span><span class=si>}</span><span class=sb>, 目标: </span><span class=si>${</span><span class=nx>targetEnv</span><span class=si>}</span><span class=sb>`</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>        <span class=nx>console</span><span class=p>.</span><span class=nx>log</span><span class=p>(</span><span class=s1>&#39;请切换到正确的 Global Environment&#39;</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=总结>总结</h2><p>Global Environments 的优势：</p><ol><li><strong>环境隔离</strong>：不同环境的 token 和配置完全分离</li><li><strong>快速切换</strong>：可以快速在开发/测试/生产环境间切换</li><li><strong>配置管理</strong>：每个环境可以有不同的 API 端点、认证服务器等</li><li><strong>团队协作</strong>：团队成员可以共享环境配置</li></ol><p>这样就可以为每个环境维护独立的 token 和配置，避免了不同环境间的数据混淆。</p></div><div class=post-copyright><p class=copyright-item><span class=item-title>文章作者</span>
+<span class=item-content>Chen Guixian</span></p><p class=copyright-item><span class=item-title>上次更新</span>
+<span class=item-content>2025-03-12</span></p></div><footer class=post-footer><div class=post-tags><a href=/tags/insomnia/>Insomnia</a></div><nav class=post-nav><a class=prev href=/post/mongodb/mongodb-archive-large-collection-data/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">MongoDB Shell 数据归档指南：将大表数据归档到另一表</span>
+<span class="prev-text nav-mobile">上一篇</span>
+</a><a class=next href=/post/op/migrate-pg-databse/><span class="next-text nav-default">迁移 kong 中的 PostgreSQL 数据库</span>
+<span class="next-text nav-mobile">下一篇</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links></div><div class=copyright><span class=power-by>由 <a class=hexo-link href=https://gohugo.io>Hugo</a> 强力驱动
+</span><span class=division>|</span>
+<span class=theme-info>主题 -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a>
+</span><span class=copyright-year>&copy;
+2017 -
+2025<span class=heart><i class="iconfont icon-heart"></i></span><span>Chen Guixian</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script><script type=text/javascript src=/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js></script><script async src="https://www.googletagmanager.com/gtag/js?id=G-T2MFM23ZJM"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-T2MFM23ZJM")}</script></body></html>
