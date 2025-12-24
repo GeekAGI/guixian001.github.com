@@ -1,0 +1,241 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1"><title>MongoDB 孤儿文档介绍与清理指南 - Guixian 的日常记录</title>
+<meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=Cache-Control content="no-transform"><meta http-equiv=Cache-Control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Chen Guixian"><meta name=description content="在MongoDB分片集群中，孤儿文档（Orphaned Document）是指那些存在于某个分片上但不应该存在于该分片上的文档。这些文档对应用程序是不可见的，因为MongoDB的路由服务（mongos）不会将查询路由到包含这些文档的分片。"><meta name=keywords content="MongoDB"><meta name=generator content="Hugo 0.134.3 with theme even"><link rel=canonical href=https://blog.chenguixian.com/post/mongodb/mongodb-orphaned-documents-check-and-cleanup-guide/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link href=/sass/main.min.da774276428e8a6854e28c9290a6dfdbe7a5a343455f0a76358a2f66d0a56366.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:url" content="https://blog.chenguixian.com/post/mongodb/mongodb-orphaned-documents-check-and-cleanup-guide/"><meta property="og:site_name" content="Guixian 的日常记录"><meta property="og:title" content="MongoDB 孤儿文档介绍与清理指南"><meta property="og:description" content="在MongoDB分片集群中，孤儿文档（Orphaned Document）是指那些存在于某个分片上但不应该存在于该分片上的文档。这些文档对应用程序是不可见的，因为MongoDB的路由服务（mongos）不会将查询路由到包含这些文档的分片。"><meta property="og:locale" content="zh_cn"><meta property="og:type" content="article"><meta property="article:section" content="post"><meta property="article:published_time" content="2025-11-02T10:28:04+08:00"><meta property="article:modified_time" content="2025-11-02T22:28:04+08:00"><meta itemprop=name content="MongoDB 孤儿文档介绍与清理指南"><meta itemprop=description content="在MongoDB分片集群中，孤儿文档（Orphaned Document）是指那些存在于某个分片上但不应该存在于该分片上的文档。这些文档对应用程序是不可见的，因为MongoDB的路由服务（mongos）不会将查询路由到包含这些文档的分片。"><meta itemprop=datePublished content="2025-11-02T10:28:04+08:00"><meta itemprop=dateModified content="2025-11-02T22:28:04+08:00"><meta itemprop=wordCount content="2494"><meta itemprop=keywords content="MongoDB"><meta name=twitter:card content="summary"><meta name=twitter:title content="MongoDB 孤儿文档介绍与清理指南"><meta name=twitter:description content="在MongoDB分片集群中，孤儿文档（Orphaned Document）是指那些存在于某个分片上但不应该存在于该分片上的文档。这些文档对应用程序是不可见的，因为MongoDB的路由服务（mongos）不会将查询路由到包含这些文档的分片。"><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script><script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>Guixian 的日常记录</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/><li class=mobile-menu-item>Home</li></a><a href=/post/><li class=mobile-menu-item>Archives</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>Guixian 的日常记录</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/>Home</a></li><li class=menu-item><a class=menu-item-link href=/post/>Archives</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>MongoDB 孤儿文档介绍与清理指南</h1><div class=post-meta><span class=post-time>2025-11-02</span><div class=post-category><a href=/categories/mongodb/>MongoDB</a></div></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>文章目录</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><ul><li><a href=#什么是孤儿文档>什么是孤儿文档</a></li><li><a href=#孤儿文档的影响>孤儿文档的影响</a></li><li><a href=#检查孤儿文档>检查孤儿文档</a><ul><li><a href=#mongodb-50及以前版本>MongoDB 5.0及以前版本</a></li><li><a href=#mongodb-60及以后版本>MongoDB 6.0及以后版本</a></li></ul></li><li><a href=#清理孤儿文档连接到每个分片节点>清理孤儿文档（连接到每个分片节点）</a><ul><li><a href=#使用cleanuporphanedjs脚本>使用cleanupOrphaned.js脚本</a></li><li><a href=#执行清理脚本>执行清理脚本</a></li></ul></li><li><a href=#清理孤儿文档通过-mongos-节点执行>清理孤儿文档（通过 mongos 节点执行）</a><ul><li><a href=#mongodb-44及以后版本>MongoDB 4.4及以后版本</a></li><li><a href=#mongodb-42及以前版本>MongoDB 4.2及以前版本</a></li><li><a href=#执行步骤>执行步骤</a></li></ul></li><li><a href=#注意事项>注意事项</a></li><li><a href=#附录>附录</a></li></ul></li></ul></nav></div></div><div class=post-content><h2 id=什么是孤儿文档>什么是孤儿文档</h2><p>在MongoDB分片集群中，孤儿文档（Orphaned Document）是指那些存在于某个分片上但不应该存在于该分片上的文档。这些文档对应用程序是不可见的，因为MongoDB的路由服务（mongos）不会将查询路由到包含这些文档的分片。</p><p>孤儿文档的产生通常与MongoDB的负载均衡机制有关。当MongoDB的Balancer服务根据分片键（Shard Key）重新分布数据时，它会将数据块（Chunk）从一个分片迁移到另一个分片。迁移过程包括先将数据复制到目标分片，然后从源分片删除。如果在这个过程中发生网络中断或其他异常，可能会导致数据成功复制到目标分片但未能从源分片删除，从而在两个分片上都存在相同的文档。由于配置服务器（Config Server）只会记录文档应该存在于目标分片上，源分片上的文档就变成了孤儿文档。</p><h2 id=孤儿文档的影响>孤儿文档的影响</h2><p>孤儿文档会对MongoDB集群产生以下影响：</p><ol><li><strong>数据一致性问题</strong>：在数据迁移或备份过程中，孤儿文档可能导致数据内容或行数不一致。</li><li><strong>存储空间浪费</strong>：孤儿文档占用额外的存储空间，但对应用程序不可见，造成资源浪费。</li><li><strong>性能影响</strong>：在某些操作中，孤儿文档可能会被错误地处理，影响系统性能。</li></ol><h2 id=检查孤儿文档>检查孤儿文档</h2><h3 id=mongodb-50及以前版本>MongoDB 5.0及以前版本</h3><p>使用root或高权限账号连接到Mongos节点，执行以下命令检查指定集合的孤儿文档：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=nx>db</span><span class=p>.</span><span class=nx>getSiblingDB</span><span class=p>(</span><span class=s2>&#34;&lt;db&gt;&#34;</span><span class=p>).</span><span class=o>&lt;</span><span class=nx>collection</span><span class=o>&gt;</span><span class=p>.</span><span class=nx>find</span><span class=p>().</span><span class=nx>readPref</span><span class=p>(</span><span class=s2>&#34;secondary&#34;</span><span class=p>).</span><span class=nx>readConcern</span><span class=p>(</span><span class=s2>&#34;local&#34;</span><span class=p>).</span><span class=nx>explain</span><span class=p>(</span><span class=s2>&#34;executionStats&#34;</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><p>在返回结果中，关注<code>SHARDING_FILTER</code>阶段的<code>chunkSkips</code>属性，其值代表该集合在当前分片上的孤儿文档数量。</p><ul><li>由于该命令会扫描所有Shard节点上的文档，为降低对业务的影响，该命令设置了<code>readPreference</code>参数，将会在Secondary节点上执行。</li><li><strong>该命令的执行耗时与库表的数据量和文档数成正比，当数据量较大时，查询耗时会比较长</strong>，<strong>并且会对数据库实例产生一定的查询压力</strong>，需要注意不用再线上库直接执行。</li></ul><h3 id=mongodb-60及以后版本>MongoDB 6.0及以后版本</h3><p>MongoDB 6.0及以上版本可以通过<code>$shardedDataDistribution</code>聚合阶段来检查孤儿文档：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span><span class=lnt>2
+</span><span class=lnt>3
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=nx>db</span><span class=p>.</span><span class=nx>getSiblingDB</span><span class=p>(</span><span class=s2>&#34;admin&#34;</span><span class=p>).</span><span class=nx>aggregate</span><span class=p>(</span> <span class=p>[{</span> <span class=nx>$shardedDataDistribution</span><span class=o>:</span> <span class=p>{</span> <span class=p>}</span> <span class=p>}]</span> <span class=p>).</span><span class=nx>pretty</span><span class=p>()</span>
+</span></span><span class=line><span class=cl><span class=c1>//如果只需要确认某个单独的namespace是否包含孤立文档，则按需添加过滤字段即可
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=nx>db</span><span class=p>.</span><span class=nx>getSiblingDB</span><span class=p>(</span><span class=s2>&#34;admin&#34;</span><span class=p>).</span><span class=nx>aggregate</span><span class=p>(</span> <span class=p>[{</span> <span class=nx>$shardedDataDistribution</span><span class=o>:</span> <span class=p>{</span> <span class=p>}</span> <span class=p>},{</span> <span class=nx>$match</span><span class=o>:</span> <span class=p>{</span> <span class=s2>&#34;ns&#34;</span><span class=o>:</span> <span class=s2>&#34;&lt;db&gt;.&lt;collection&gt;&#34;</span> <span class=p>}</span> <span class=p>}]</span> <span class=p>).</span><span class=nx>pretty</span><span class=p>()</span>
+</span></span></code></pre></td></tr></table></div></div><p>返回结果中的<code>numOrphanedDocs</code>参数值即是某个集合在该分片上的孤儿文档数量。</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-fallback data-lang=fallback><span class=line><span class=cl>[
+</span></span><span class=line><span class=cl>  {
+</span></span><span class=line><span class=cl>    &#34;ns&#34;: &#34;test.names&#34;,
+</span></span><span class=line><span class=cl>    &#34;shards&#34;: [
+</span></span><span class=line><span class=cl>      {
+</span></span><span class=line><span class=cl>        &#34;shardName&#34;: &#34;shard-1&#34;,
+</span></span><span class=line><span class=cl>        &#34;numOrphanedDocs&#34;: 0,
+</span></span><span class=line><span class=cl>        &#34;numOwnedDocuments&#34;: 6,
+</span></span><span class=line><span class=cl>        &#34;ownedSizeBytes&#34;: 366,
+</span></span><span class=line><span class=cl>        &#34;orphanedSizeBytes&#34;: 0
+</span></span><span class=line><span class=cl>      },
+</span></span><span class=line><span class=cl>      {
+</span></span><span class=line><span class=cl>        &#34;shardName&#34;: &#34;shard-2&#34;,
+</span></span><span class=line><span class=cl>        &#34;numOrphanedDocs&#34;: 0,
+</span></span><span class=line><span class=cl>        &#34;numOwnedDocuments&#34;: 6,
+</span></span><span class=line><span class=cl>        &#34;ownedSizeBytes&#34;: 366,
+</span></span><span class=line><span class=cl>        &#34;orphanedSizeBytes&#34;: 0
+</span></span><span class=line><span class=cl>      }
+</span></span><span class=line><span class=cl>    ]
+</span></span><span class=line><span class=cl>  }
+</span></span><span class=line><span class=cl>]
+</span></span></code></pre></td></tr></table></div></div><h2 id=清理孤儿文档连接到每个分片节点>清理孤儿文档（连接到每个分片节点）</h2><p>清理孤儿文档需要使用MongoDB提供的<code>cleanupOrphaned</code>命令。以下是具体的清理方法：</p><h3 id=使用cleanuporphanedjs脚本>使用cleanupOrphaned.js脚本</h3><p>我们可以使用以下JavaScript脚本来清理孤儿文档：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=kd>function</span> <span class=nx>cleanupOrphaned</span><span class=p>(</span><span class=nx>coll</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kd>var</span> <span class=nx>nextKey</span> <span class=o>=</span> <span class=p>{</span> <span class=p>};</span>
+</span></span><span class=line><span class=cl>  <span class=kd>var</span> <span class=nx>result</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>  <span class=k>while</span> <span class=p>(</span> <span class=nx>nextKey</span> <span class=o>!=</span> <span class=kc>null</span> <span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=nx>result</span> <span class=o>=</span> <span class=nx>db</span><span class=p>.</span><span class=nx>adminCommand</span><span class=p>(</span> <span class=p>{</span> <span class=nx>cleanupOrphaned</span><span class=o>:</span> <span class=nx>coll</span><span class=p>,</span> <span class=nx>startingFromKey</span><span class=o>:</span> <span class=nx>nextKey</span> <span class=p>}</span> <span class=p>);</span>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nx>result</span><span class=p>.</span><span class=nx>ok</span> <span class=o>!=</span> <span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>       <span class=nx>print</span><span class=p>(</span><span class=s2>&#34;Unable to complete at this time: failure or timeout.&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=nx>printjson</span><span class=p>(</span><span class=nx>result</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>  
+</span></span><span class=line><span class=cl>    <span class=nx>nextKey</span> <span class=o>=</span> <span class=nx>result</span><span class=p>.</span><span class=nx>stoppedAtKey</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kd>var</span> <span class=nx>dbName</span> <span class=o>=</span> <span class=s1>&#39;test&#39;</span>
+</span></span><span class=line><span class=cl><span class=nx>db</span> <span class=o>=</span> <span class=nx>db</span><span class=p>.</span><span class=nx>getSiblingDB</span><span class=p>(</span><span class=nx>dbName</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=nx>db</span><span class=p>.</span><span class=nx>getCollectionNames</span><span class=p>().</span><span class=nx>forEach</span><span class=p>(</span><span class=kd>function</span><span class=p>(</span><span class=nx>collName</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=nx>cleanupOrphaned</span><span class=p>(</span><span class=nx>dbName</span> <span class=o>+</span> <span class=s2>&#34;.&#34;</span> <span class=o>+</span> <span class=nx>collName</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><p>这个脚本的工作原理是：</p><ol><li>定义<code>cleanupOrphaned</code>函数，该函数通过循环调用<code>cleanupOrphaned</code>命令来清理指定集合的孤儿文档</li><li>设置要处理的数据库名称</li><li>遍历数据库中的所有集合，对每个集合执行清理操作</li></ol><h3 id=执行清理脚本>执行清理脚本</h3><p>要执行清理脚本，需要连接到分片节点并运行脚本：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt>1
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-bash data-lang=bash><span class=line><span class=cl>mongo --host ShardIP --port Primaryport --authenticationDatabase database -u username -p password cleanupOrphaned.js
+</span></span></code></pre></td></tr></table></div></div><p>参数说明：</p><ul><li><code>ShardIP</code>：分片节点的IP地址</li><li><code>Primaryport</code>：分片节点中Primary节点的服务端口</li><li><code>database</code>：鉴权数据库名</li><li><code>username</code>：登录数据库的账号</li><li><code>password</code>：登录数据库的密码</li></ul><h2 id=清理孤儿文档通过-mongos-节点执行>清理孤儿文档（通过 mongos 节点执行）</h2><h3 id=mongodb-44及以后版本>MongoDB 4.4及以后版本</h3><p>对于MongoDB 4.4及以后版本，可以使用以下脚本通过mongos连接清理多个分片节点上的孤儿文档：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=c1>// 分片实例名称列表，需要按照实际情况修改
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>var</span> <span class=nx>shardNames</span> <span class=o>=</span> <span class=p>[</span><span class=s2>&#34;shardName1&#34;</span><span class=p>,</span> <span class=s2>&#34;shardName2&#34;</span><span class=p>];</span>
+</span></span><span class=line><span class=cl><span class=c1>// 数据库列表，需要按照实际情况修改
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>var</span> <span class=nx>databasesToProcess</span> <span class=o>=</span> <span class=p>[</span><span class=s2>&#34;database1&#34;</span><span class=p>,</span> <span class=s2>&#34;database2&#34;</span><span class=p>,</span> <span class=s2>&#34;database3&#34;</span><span class=p>];</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nx>shardNames</span><span class=p>.</span><span class=nx>forEach</span><span class=p>(</span><span class=kd>function</span><span class=p>(</span><span class=nx>shardName</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=c1>// 遍历指定的数据库列表
+</span></span></span><span class=line><span class=cl><span class=c1></span>  <span class=nx>databasesToProcess</span><span class=p>.</span><span class=nx>forEach</span><span class=p>(</span><span class=kd>function</span><span class=p>(</span><span class=nx>dbName</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kd>var</span> <span class=nx>dbInstance</span> <span class=o>=</span> <span class=nx>db</span><span class=p>.</span><span class=nx>getSiblingDB</span><span class=p>(</span><span class=nx>dbName</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 获取该数据库实例的所有集合名称
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=kd>var</span> <span class=nx>collectionNames</span> <span class=o>=</span> <span class=nx>dbInstance</span><span class=p>.</span><span class=nx>getCollectionNames</span><span class=p>();</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=c1>// 遍历每个集合
+</span></span></span><span class=line><span class=cl><span class=c1></span>    <span class=nx>collectionNames</span><span class=p>.</span><span class=nx>forEach</span><span class=p>(</span><span class=kd>function</span><span class=p>(</span><span class=nx>collectionName</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=c1>// 完整的集合名称
+</span></span></span><span class=line><span class=cl><span class=c1></span>      <span class=kd>var</span> <span class=nx>fullCollectionName</span> <span class=o>=</span> <span class=nx>dbName</span> <span class=o>+</span> <span class=s2>&#34;.&#34;</span> <span class=o>+</span> <span class=nx>collectionName</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>      <span class=c1>// 构建 cleanupOrphaned 命令
+</span></span></span><span class=line><span class=cl><span class=c1></span>      <span class=kd>var</span> <span class=nx>command</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>runCommandOnShard</span><span class=o>:</span> <span class=nx>shardName</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=nx>command</span><span class=o>:</span> <span class=p>{</span> <span class=nx>cleanupOrphaned</span><span class=o>:</span> <span class=nx>fullCollectionName</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>      <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>      <span class=c1>// 执行命令
+</span></span></span><span class=line><span class=cl><span class=c1></span>      <span class=kd>var</span> <span class=nx>result</span> <span class=o>=</span> <span class=nx>db</span><span class=p>.</span><span class=nx>adminCommand</span><span class=p>(</span><span class=nx>command</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=nx>printjson</span><span class=p>(</span><span class=nx>result</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=k>if</span> <span class=p>(</span><span class=nx>result</span><span class=p>.</span><span class=nx>ok</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>print</span><span class=p>(</span><span class=s2>&#34;Cleaned up orphaned documents for collection &#34;</span> <span class=o>+</span> <span class=nx>fullCollectionName</span> <span class=o>+</span> <span class=s2>&#34; on shard &#34;</span> <span class=o>+</span> <span class=nx>shardName</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span> <span class=k>else</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=nx>print</span><span class=p>(</span><span class=s2>&#34;Failed to clean up orphaned documents for collection &#34;</span> <span class=o>+</span> <span class=nx>fullCollectionName</span> <span class=o>+</span> <span class=s2>&#34; on shard &#34;</span> <span class=o>+</span> <span class=nx>shardName</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>      <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>});</span>
+</span></span><span class=line><span class=cl>  <span class=p>});</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=mongodb-42及以前版本>MongoDB 4.2及以前版本</h3><p>对于MongoDB 4.2及以前版本，可以使用以下脚本：</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-javascript data-lang=javascript><span class=line><span class=cl><span class=kd>function</span> <span class=nx>cleanupOrphanedOnShard</span><span class=p>(</span><span class=nx>shardName</span><span class=p>,</span> <span class=nx>fullCollectionName</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=kd>var</span> <span class=nx>nextKey</span> <span class=o>=</span> <span class=p>{</span> <span class=p>};</span>
+</span></span><span class=line><span class=cl>  <span class=kd>var</span> <span class=nx>result</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=k>while</span> <span class=p>(</span> <span class=nx>nextKey</span> <span class=o>!=</span> <span class=kc>null</span> <span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>    <span class=kd>var</span> <span class=nx>command</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=nx>runCommandOnShard</span><span class=o>:</span> <span class=nx>shardName</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>      <span class=nx>command</span><span class=o>:</span> <span class=p>{</span> <span class=nx>cleanupOrphaned</span><span class=o>:</span> <span class=nx>fullCollectionName</span><span class=p>,</span> <span class=nx>startingFromKey</span><span class=o>:</span> <span class=nx>nextKey</span> <span class=p>}</span>
+</span></span><span class=line><span class=cl>    <span class=p>};</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nx>result</span> <span class=o>=</span> <span class=nx>db</span><span class=p>.</span><span class=nx>adminCommand</span><span class=p>(</span><span class=nx>command</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>    <span class=nx>printjson</span><span class=p>(</span><span class=nx>result</span><span class=p>);</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=p>(</span><span class=nx>result</span><span class=p>.</span><span class=nx>ok</span> <span class=o>!=</span> <span class=mi>1</span> <span class=o>||</span> <span class=o>!</span><span class=p>(</span><span class=nx>result</span><span class=p>.</span><span class=nx>results</span><span class=p>.</span><span class=nx>hasOwnProperty</span><span class=p>(</span><span class=nx>shardName</span><span class=p>))</span> <span class=o>||</span> <span class=nx>result</span><span class=p>.</span><span class=nx>results</span><span class=p>[</span><span class=nx>shardName</span><span class=p>].</span><span class=nx>ok</span> <span class=o>!=</span> <span class=mi>1</span> <span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>      <span class=nx>print</span><span class=p>(</span><span class=s2>&#34;Unable to complete at this time: failure or timeout.&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>      <span class=k>break</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>    <span class=nx>nextKey</span> <span class=o>=</span> <span class=nx>result</span><span class=p>.</span><span class=nx>results</span><span class=p>[</span><span class=nx>shardName</span><span class=p>].</span><span class=nx>stoppedAtKey</span><span class=p>;</span>
+</span></span><span class=line><span class=cl>  <span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>  <span class=nx>print</span><span class=p>(</span><span class=s2>&#34;cleanupOrphaned done for coll: &#34;</span> <span class=o>+</span> <span class=nx>fullCollectionName</span> <span class=o>+</span> <span class=s2>&#34; on shard: &#34;</span> <span class=o>+</span> <span class=nx>shardName</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 分片实例名称列表，需要按照实际情况修改
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>var</span> <span class=nx>shardNames</span> <span class=o>=</span> <span class=p>[</span><span class=s2>&#34;shardName1&#34;</span><span class=p>,</span> <span class=s2>&#34;shardName2&#34;</span><span class=p>,</span> <span class=s2>&#34;shardName3&#34;</span><span class=p>]</span>
+</span></span><span class=line><span class=cl><span class=c1>// 需要清理的数据库指定集合，可以按照实际情况修改
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>var</span> <span class=nx>fullCollectionName</span> <span class=o>=</span> <span class=s2>&#34;database.collection&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=nx>shardNames</span><span class=p>.</span><span class=nx>forEach</span><span class=p>(</span><span class=kd>function</span><span class=p>(</span><span class=nx>shardName</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>  <span class=nx>cleanupOrphanedOnShard</span><span class=p>(</span><span class=nx>shardName</span><span class=p>,</span> <span class=nx>fullCollectionName</span><span class=p>);</span>
+</span></span><span class=line><span class=cl><span class=p>});</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=执行步骤>执行步骤</h3><ol><li><p><strong>修改脚本参数</strong>：</p><ul><li><code>shardNames</code>：分片集群实例中待清理孤儿文档的分片节点ID数组</li><li><code>databasesToProcess</code>：待清理孤儿文档的数据库名称数组（仅适用于4.4及以后版本）</li><li><code>fullCollectionName</code>：待清理孤儿文档的集合名称，格式为"数据库名称.集合名称"（仅适用于4.2及以前版本）</li></ul></li><li><p><strong>通过Mongo Shell命令运行脚本</strong>：</p><p><code>mongo --host &lt;Mongoshost> --port &lt;Primaryport> --authenticationDatabase &lt;database> -u &lt;username> -p &lt;password> cleanupOrphaned.js > output.txt</code></p></li></ol><p>参数说明：</p><ul><li><code>&lt;Mongoshost></code>：分片集群实例mongos节点的连接地址</li><li><code>&lt;Primaryport></code>：分片集群实例mongos节点的端口号，默认为3717</li><li><code>&lt;database></code>：鉴权数据库名，即数据库账号所属的数据库</li><li><code>&lt;username></code>：数据库账号</li><li><code>&lt;password></code>：数据库账号的密码</li></ul><h2 id=注意事项>注意事项</h2><ol><li><strong>版本要求</strong>：不同版本存在一些差异，需要仔细验证测试后再正式环境执行。</li><li><strong>执行时机</strong>：建议在业务低峰期执行清理操作，以减少对业务的影响。</li><li><strong>权限要求</strong>：执行清理操作需要具有足够权限的数据库账号。</li><li><strong>备份建议</strong>：在执行清理操作前，建议先备份重要数据。</li></ol><h2 id=附录>附录</h2><ul><li>4.2及以前：<a href=https://www.mongodb.com/docs/v4.2/reference/command/cleanupOrphaned/>cleanupOrphaned</a></li><li>4.4及以后：<a href=https://www.mongodb.com/docs/manual/reference/command/cleanupOrphaned/>cleanupOrphaned</a></li><li><a href=https://support.huaweicloud.com/drs_faq/drs_09_0101.html>分片集群MongoDB迁移前清除孤儿文档</a></li><li><a href=https://www.alibabacloud.com/help/zh/mongodb/support/how-to-clean-up-orphaned-documents#4ded23bd9d4j2>如何清理孤立文档</a></li></ul></div><div class=post-copyright><p class=copyright-item><span class=item-title>文章作者</span>
+<span class=item-content>Chen Guixian</span></p><p class=copyright-item><span class=item-title>上次更新</span>
+<span class=item-content>2025-11-02</span></p></div><footer class=post-footer><nav class=post-nav><a class=prev href=/post/op/s3cmd-configuration-usage-guide/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">s3cmd s3命令行工具</span>
+<span class="prev-text nav-mobile">上一篇</span>
+</a><a class=next href=/post/ai/ai-programming-era-core-skills-for-tech-professionals/><span class="next-text nav-default">“AI 编程”时代，技术从业者思考</span>
+<span class="next-text nav-mobile">下一篇</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links></div><div class=copyright><span class=power-by>由 <a class=hexo-link href=https://gohugo.io>Hugo</a> 强力驱动
+</span><span class=division>|</span>
+<span class=theme-info>主题 -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a>
+</span><span class=copyright-year>&copy;
+2017 -
+2025<span class=heart><i class="iconfont icon-heart"></i></span><span>Chen Guixian</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script><script type=text/javascript src=/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js></script><script async src="https://www.googletagmanager.com/gtag/js?id=G-T2MFM23ZJM"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-T2MFM23ZJM")}</script></body></html>

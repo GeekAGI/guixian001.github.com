@@ -1,0 +1,474 @@
+<!doctype html><html lang=zh-cn><head><meta charset=utf-8><meta http-equiv=X-UA-Compatible content="IE=edge,chrome=1"><title>空行在代码中的重要性 - Guixian 的日常记录</title>
+<meta name=renderer content="webkit"><meta name=viewport content="width=device-width,initial-scale=1,maximum-scale=1"><meta http-equiv=Cache-Control content="no-transform"><meta http-equiv=Cache-Control content="no-siteapp"><meta name=theme-color content="#f8f5ec"><meta name=msapplication-navbutton-color content="#f8f5ec"><meta name=apple-mobile-web-app-capable content="yes"><meta name=apple-mobile-web-app-status-bar-style content="#f8f5ec"><meta name=author content="Chen Guixian"><meta name=description content="空行在代码开发中非常重要，日常代码复核中发现经常遇到一些代码堆在一起的情况，十分影响代码的可读性。代码不仅要让机器跑得通，更要让人类读得懂。
+下面举一些 Python 的例子进行说明：
+"><meta name=keywords content="程序员的日常记录,编码人生,生活笔记"><meta name=generator content="Hugo 0.134.3 with theme even"><link rel=canonical href=https://blog.chenguixian.com/post/misc/how-whitespace-improves-code-quality/><link rel=apple-touch-icon sizes=180x180 href=/apple-touch-icon.png><link rel=icon type=image/png sizes=32x32 href=/favicon-32x32.png><link rel=icon type=image/png sizes=16x16 href=/favicon-16x16.png><link rel=manifest href=/manifest.json><link rel=mask-icon href=/safari-pinned-tab.svg color=#5bbad5><link href=/sass/main.min.da774276428e8a6854e28c9290a6dfdbe7a5a343455f0a76358a2f66d0a56366.css rel=stylesheet><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.css integrity="sha256-7TyXnr2YU040zfSP+rEcz29ggW4j56/ujTPwjMzyqFY=" crossorigin=anonymous><meta property="og:url" content="https://blog.chenguixian.com/post/misc/how-whitespace-improves-code-quality/"><meta property="og:site_name" content="Guixian 的日常记录"><meta property="og:title" content="空行在代码中的重要性"><meta property="og:description" content="空行在代码开发中非常重要，日常代码复核中发现经常遇到一些代码堆在一起的情况，十分影响代码的可读性。代码不仅要让机器跑得通，更要让人类读得懂。
+下面举一些 Python 的例子进行说明："><meta property="og:locale" content="zh_cn"><meta property="og:type" content="article"><meta property="article:section" content="post"><meta property="article:published_time" content="2025-08-04T10:12:24+08:00"><meta property="article:modified_time" content="2025-08-04T10:12:24+08:00"><meta itemprop=name content="空行在代码中的重要性"><meta itemprop=description content="空行在代码开发中非常重要，日常代码复核中发现经常遇到一些代码堆在一起的情况，十分影响代码的可读性。代码不仅要让机器跑得通，更要让人类读得懂。
+下面举一些 Python 的例子进行说明："><meta itemprop=datePublished content="2025-08-04T10:12:24+08:00"><meta itemprop=dateModified content="2025-08-04T10:12:24+08:00"><meta itemprop=wordCount content="1721"><meta itemprop=keywords content="MISC"><meta name=twitter:card content="summary"><meta name=twitter:title content="空行在代码中的重要性"><meta name=twitter:description content="空行在代码开发中非常重要，日常代码复核中发现经常遇到一些代码堆在一起的情况，十分影响代码的可读性。代码不仅要让机器跑得通，更要让人类读得懂。
+下面举一些 Python 的例子进行说明："><!--[if lte IE 9]><script src=https://cdnjs.cloudflare.com/ajax/libs/classlist/1.1.20170427/classList.min.js></script><![endif]--><!--[if lt IE 9]><script src=https://cdn.jsdelivr.net/npm/html5shiv@3.7.3/dist/html5shiv.min.js></script><script src=https://cdn.jsdelivr.net/npm/respond.js@1.4.2/dest/respond.min.js></script><![endif]--></head><body><div id=mobile-navbar class=mobile-navbar><div class=mobile-header-logo><a href=/ class=logo>Guixian 的日常记录</a></div><div class=mobile-navbar-icon><span></span>
+<span></span>
+<span></span></div></div><nav id=mobile-menu class="mobile-menu slideout-menu"><ul class=mobile-menu-list><a href=/><li class=mobile-menu-item>Home</li></a><a href=/post/><li class=mobile-menu-item>Archives</li></a><a href=/tags/><li class=mobile-menu-item>Tags</li></a><a href=/categories/><li class=mobile-menu-item>Categories</li></a></ul></nav><div class=container id=mobile-panel><header id=header class=header><div class=logo-wrapper><a href=/ class=logo>Guixian 的日常记录</a></div><nav class=site-navbar><ul id=menu class=menu><li class=menu-item><a class=menu-item-link href=/>Home</a></li><li class=menu-item><a class=menu-item-link href=/post/>Archives</a></li><li class=menu-item><a class=menu-item-link href=/tags/>Tags</a></li><li class=menu-item><a class=menu-item-link href=/categories/>Categories</a></li></ul></nav></header><main id=main class=main><div class=content-wrapper><div id=content class=content><article class=post><header class=post-header><h1 class=post-title>空行在代码中的重要性</h1><div class=post-meta><span class=post-time>2025-08-04</span><div class=post-category><a href=/categories/misc/>MISC</a></div></div></header><div class=post-toc id=post-toc><h2 class=post-toc-title>文章目录</h2><div class=post-toc-content><nav id=TableOfContents><ul><li><ul><li><a href=#1-语法层面的重要性>1. 语法层面的重要性</a><ul><li><a href=#缩进和代码块分隔>缩进和代码块分隔</a></li></ul></li><li><a href=#2-代码可读性和组织>2. 代码可读性和组织</a><ul><li><a href=#逻辑分组>逻辑分组</a></li><li><a href=#类的组织>类的组织</a></li></ul></li><li><a href=#3-pep-8-规范要求>3. PEP 8 规范要求</a><ul><li><a href=#函数和类之间的空行>函数和类之间的空行</a></li></ul></li><li><a href=#4-模块结构中的空行使用>4. 模块结构中的空行使用</a></li><li><a href=#5-实际应用示例>5. 实际应用示例</a></li><li><a href=#总结>总结</a></li></ul></li></ul></nav></div></div><div class=post-content><p>空行在代码开发中非常重要，日常代码复核中发现经常遇到一些代码堆在一起的情况，十分影响代码的可读性。代码不仅要让机器跑得通，更要让人类读得懂。</p><p>下面举一些 Python 的例子进行说明：</p><h2 id=1-语法层面的重要性>1. 语法层面的重要性</h2><h3 id=缩进和代码块分隔>缩进和代码块分隔</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=c1># ❌ 错误示例 - 缺少适当的空行会影响可读性</span>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>function1</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=s2>&#34;Hello&#34;</span>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>function2</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=s2>&#34;World&#34;</span>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>MyClass</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>method1</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>method2</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># ✅ 正确示例 - 使用空行分隔</span>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>function1</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=s2>&#34;Hello&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>function2</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=s2>&#34;World&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>MyClass</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>method1</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>method2</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=2-代码可读性和组织>2. 代码可读性和组织</h2><h3 id=逻辑分组>逻辑分组</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=c1># ❌ 没有空行的代码 - 难以阅读</span>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>process_data</span><span class=p>(</span><span class=n>data</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=n>cleaned_data</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>item</span> <span class=ow>in</span> <span class=n>data</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>item</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>cleaned_data</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>item</span><span class=o>.</span><span class=n>strip</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>    <span class=n>result</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>item</span> <span class=ow>in</span> <span class=n>cleaned_data</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=nb>len</span><span class=p>(</span><span class=n>item</span><span class=p>)</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>result</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>item</span><span class=o>.</span><span class=n>upper</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>    <span class=n>final_count</span> <span class=o>=</span> <span class=nb>len</span><span class=p>(</span><span class=n>result</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;Processed </span><span class=si>{</span><span class=n>final_count</span><span class=si>}</span><span class=s2> items&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>result</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># ✅ 使用空行分组的代码 - 清晰易读</span>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>process_data</span><span class=p>(</span><span class=n>data</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 数据清洗阶段</span>
+</span></span><span class=line><span class=cl>    <span class=n>cleaned_data</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>item</span> <span class=ow>in</span> <span class=n>data</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>item</span> <span class=ow>is</span> <span class=ow>not</span> <span class=kc>None</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>cleaned_data</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>item</span><span class=o>.</span><span class=n>strip</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># 数据处理阶段</span>
+</span></span><span class=line><span class=cl>    <span class=n>result</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>item</span> <span class=ow>in</span> <span class=n>cleaned_data</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=nb>len</span><span class=p>(</span><span class=n>item</span><span class=p>)</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>result</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>item</span><span class=o>.</span><span class=n>upper</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># 结果统计和返回</span>
+</span></span><span class=line><span class=cl>    <span class=n>final_count</span> <span class=o>=</span> <span class=nb>len</span><span class=p>(</span><span class=n>result</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;Processed </span><span class=si>{</span><span class=n>final_count</span><span class=si>}</span><span class=s2> items&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>result</span>
+</span></span></code></pre></td></tr></table></div></div><h3 id=类的组织>类的组织</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>class</span> <span class=nc>DataProcessor</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;数据处理器类&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>config</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>config</span> <span class=o>=</span> <span class=n>config</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>data</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># 数据输入方法</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>load_data</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>source</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;&#34;&#34;加载数据&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>validate_data</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;&#34;&#34;验证数据&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># 数据处理方法</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>clean_data</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;&#34;&#34;清洗数据&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>transform_data</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;&#34;&#34;转换数据&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># 输出方法</span>
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>save_data</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>destination</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;&#34;&#34;保存数据&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=3-pep-8-规范要求>3. PEP 8 规范要求</h2><h3 id=函数和类之间的空行>函数和类之间的空行</h3><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=c1># ✅ 遵循 PEP 8 规范</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>os</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>sys</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=n>GLOBAL_CONSTANT</span> <span class=o>=</span> <span class=s2>&#34;value&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>utility_function</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;工具函数&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>pass</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>FirstClass</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;第一个类&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>method1</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>SecondClass</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;第二个类&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=vm>__name__</span> <span class=o>==</span> <span class=s2>&#34;__main__&#34;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=c1># 主程序逻辑</span>
+</span></span><span class=line><span class=cl>    <span class=n>first</span> <span class=o>=</span> <span class=n>FirstClass</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>    <span class=n>second</span> <span class=o>=</span> <span class=n>SecondClass</span><span class=p>()</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=4-模块结构中的空行使用>4. 模块结构中的空行使用</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span><span class=lnt>38
+</span><span class=lnt>39
+</span><span class=lnt>40
+</span><span class=lnt>41
+</span><span class=lnt>42
+</span><span class=lnt>43
+</span><span class=lnt>44
+</span><span class=lnt>45
+</span><span class=lnt>46
+</span><span class=lnt>47
+</span><span class=lnt>48
+</span><span class=lnt>49
+</span><span class=lnt>50
+</span><span class=lnt>51
+</span><span class=lnt>52
+</span><span class=lnt>53
+</span><span class=lnt>54
+</span><span class=lnt>55
+</span><span class=lnt>56
+</span><span class=lnt>57
+</span><span class=lnt>58
+</span><span class=lnt>59
+</span><span class=lnt>60
+</span><span class=lnt>61
+</span><span class=lnt>62
+</span><span class=lnt>63
+</span><span class=lnt>64
+</span><span class=lnt>65
+</span><span class=lnt>66
+</span><span class=lnt>67
+</span><span class=lnt>68
+</span><span class=lnt>69
+</span><span class=lnt>70
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=ch>#!/usr/bin/env python3</span>
+</span></span><span class=line><span class=cl><span class=c1># -*- coding: utf-8 -*-</span>
+</span></span><span class=line><span class=cl><span class=s2>&#34;&#34;&#34;
+</span></span></span><span class=line><span class=cl><span class=s2>模块说明文档
+</span></span></span><span class=line><span class=cl><span class=s2>&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>os</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>sys</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>typing</span> <span class=kn>import</span> <span class=n>List</span><span class=p>,</span> <span class=n>Dict</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 第三方库导入</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>requests</span>
+</span></span><span class=line><span class=cl><span class=kn>import</span> <span class=nn>pandas</span> <span class=k>as</span> <span class=nn>pd</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 本地模块导入</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>.utils</span> <span class=kn>import</span> <span class=n>helper_function</span>
+</span></span><span class=line><span class=cl><span class=kn>from</span> <span class=nn>.config</span> <span class=kn>import</span> <span class=n>settings</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 全局常量</span>
+</span></span><span class=line><span class=cl><span class=n>DEFAULT_TIMEOUT</span> <span class=o>=</span> <span class=mi>30</span>
+</span></span><span class=line><span class=cl><span class=n>API_VERSION</span> <span class=o>=</span> <span class=s2>&#34;v1&#34;</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1># 全局变量</span>
+</span></span><span class=line><span class=cl><span class=n>_cache</span> <span class=o>=</span> <span class=p>{}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>public_function</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;公共函数&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>pass</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>def</span> <span class=nf>_private_function</span><span class=p>():</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;私有函数&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    <span class=k>pass</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>class</span> <span class=nc>MainClass</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;主要类&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=fm>__init__</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=bp>self</span><span class=o>.</span><span class=n>data</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>public_method</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;&#34;&#34;公共方法&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=c1># 方法内的逻辑分组</span>
+</span></span><span class=line><span class=cl>        <span class=n>setup_data</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>_prepare_data</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=n>processed_data</span> <span class=o>=</span> <span class=bp>self</span><span class=o>.</span><span class=n>_process_data</span><span class=p>(</span><span class=n>setup_data</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>        
+</span></span><span class=line><span class=cl>        <span class=k>return</span> <span class=bp>self</span><span class=o>.</span><span class=n>_format_result</span><span class=p>(</span><span class=n>processed_data</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>_prepare_data</span><span class=p>(</span><span class=bp>self</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;&#34;&#34;准备数据&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>_process_data</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>data</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;&#34;&#34;处理数据&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>def</span> <span class=nf>_format_result</span><span class=p>(</span><span class=bp>self</span><span class=p>,</span> <span class=n>data</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=s2>&#34;&#34;&#34;格式化结果&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>        <span class=k>pass</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=k>if</span> <span class=vm>__name__</span> <span class=o>==</span> <span class=s2>&#34;__main__&#34;</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>    <span class=n>main</span> <span class=o>=</span> <span class=n>MainClass</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>    <span class=n>result</span> <span class=o>=</span> <span class=n>main</span><span class=o>.</span><span class=n>public_method</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=n>result</span><span class=p>)</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=5-实际应用示例>5. 实际应用示例</h2><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span><span class=lnt>31
+</span><span class=lnt>32
+</span><span class=lnt>33
+</span><span class=lnt>34
+</span><span class=lnt>35
+</span><span class=lnt>36
+</span><span class=lnt>37
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-python data-lang=python><span class=line><span class=cl><span class=k>def</span> <span class=nf>analyze_sales_data</span><span class=p>(</span><span class=n>sales_records</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>    <span class=s2>&#34;&#34;&#34;分析销售数据的完整示例&#34;&#34;&#34;</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># 输入验证</span>
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=ow>not</span> <span class=n>sales_records</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>raise</span> <span class=ne>ValueError</span><span class=p>(</span><span class=s2>&#34;销售记录不能为空&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>if</span> <span class=ow>not</span> <span class=nb>isinstance</span><span class=p>(</span><span class=n>sales_records</span><span class=p>,</span> <span class=nb>list</span><span class=p>):</span>
+</span></span><span class=line><span class=cl>        <span class=k>raise</span> <span class=ne>TypeError</span><span class=p>(</span><span class=s2>&#34;销售记录必须是列表格式&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># 数据预处理</span>
+</span></span><span class=line><span class=cl>    <span class=n>valid_records</span> <span class=o>=</span> <span class=p>[]</span>
+</span></span><span class=line><span class=cl>    <span class=k>for</span> <span class=n>record</span> <span class=ow>in</span> <span class=n>sales_records</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>        <span class=k>if</span> <span class=n>record</span><span class=o>.</span><span class=n>get</span><span class=p>(</span><span class=s1>&#39;amount&#39;</span><span class=p>,</span> <span class=mi>0</span><span class=p>)</span> <span class=o>&gt;</span> <span class=mi>0</span><span class=p>:</span>
+</span></span><span class=line><span class=cl>            <span class=n>valid_records</span><span class=o>.</span><span class=n>append</span><span class=p>(</span><span class=n>record</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># 统计计算</span>
+</span></span><span class=line><span class=cl>    <span class=n>total_sales</span> <span class=o>=</span> <span class=nb>sum</span><span class=p>(</span><span class=n>record</span><span class=p>[</span><span class=s1>&#39;amount&#39;</span><span class=p>]</span> <span class=k>for</span> <span class=n>record</span> <span class=ow>in</span> <span class=n>valid_records</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=n>avg_sales</span> <span class=o>=</span> <span class=n>total_sales</span> <span class=o>/</span> <span class=nb>len</span><span class=p>(</span><span class=n>valid_records</span><span class=p>)</span> <span class=k>if</span> <span class=n>valid_records</span> <span class=k>else</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=n>max_sale</span> <span class=o>=</span> <span class=nb>max</span><span class=p>(</span><span class=n>valid_records</span><span class=p>,</span> <span class=n>key</span><span class=o>=</span><span class=k>lambda</span> <span class=n>x</span><span class=p>:</span> <span class=n>x</span><span class=p>[</span><span class=s1>&#39;amount&#39;</span><span class=p>])</span> <span class=k>if</span> <span class=n>valid_records</span> <span class=k>else</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>    <span class=n>min_sale</span> <span class=o>=</span> <span class=nb>min</span><span class=p>(</span><span class=n>valid_records</span><span class=p>,</span> <span class=n>key</span><span class=o>=</span><span class=k>lambda</span> <span class=n>x</span><span class=p>:</span> <span class=n>x</span><span class=p>[</span><span class=s1>&#39;amount&#39;</span><span class=p>])</span> <span class=k>if</span> <span class=n>valid_records</span> <span class=k>else</span> <span class=kc>None</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># 结果整理</span>
+</span></span><span class=line><span class=cl>    <span class=n>analysis_result</span> <span class=o>=</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;total_records&#39;</span><span class=p>:</span> <span class=nb>len</span><span class=p>(</span><span class=n>valid_records</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;total_sales&#39;</span><span class=p>:</span> <span class=n>total_sales</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;average_sales&#39;</span><span class=p>:</span> <span class=n>avg_sales</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;highest_sale&#39;</span><span class=p>:</span> <span class=n>max_sale</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>        <span class=s1>&#39;lowest_sale&#39;</span><span class=p>:</span> <span class=n>min_sale</span>
+</span></span><span class=line><span class=cl>    <span class=p>}</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=c1># 日志记录</span>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;分析完成：处理了 </span><span class=si>{</span><span class=nb>len</span><span class=p>(</span><span class=n>valid_records</span><span class=p>)</span><span class=si>}</span><span class=s2> 条记录&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    <span class=nb>print</span><span class=p>(</span><span class=sa>f</span><span class=s2>&#34;总销售额：</span><span class=si>{</span><span class=n>total_sales</span><span class=si>}</span><span class=s2>&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>    
+</span></span><span class=line><span class=cl>    <span class=k>return</span> <span class=n>analysis_result</span>
+</span></span></code></pre></td></tr></table></div></div><h2 id=总结>总结</h2><p>空行的重要性：</p><ol><li><strong>语法要求</strong>：某些情况下空行是必需的</li><li><strong>可读性提升</strong>：帮助开发者快速理解代码结构</li><li><strong>逻辑分组</strong>：将相关代码组织在一起</li><li><strong>代码规范</strong>：遵循PEP 8等编码标准</li><li><strong>维护性</strong>：使代码更容易修改和调试</li></ol><p>合理使用空行可以让Python代码更加专业、清晰和易于维护。</p></div><div class=post-copyright><p class=copyright-item><span class=item-title>文章作者</span>
+<span class=item-content>Chen Guixian</span></p><p class=copyright-item><span class=item-title>上次更新</span>
+<span class=item-content>2025-08-04</span></p></div><footer class=post-footer><nav class=post-nav><a class=prev href=/post/ai/claude-code-vibe-coding-programming-practice-summary/><i class="iconfont icon-left"></i>
+<span class="prev-text nav-default">一个半月高强度 Claude Code ：Vibe coding 是一种全新的思维模式</span>
+<span class="prev-text nav-mobile">上一篇</span>
+</a><a class=next href=/post/mongodb/mongodb-delete-data/><span class="next-text nav-default">MongoDB 删除数据方案</span>
+<span class="next-text nav-mobile">下一篇</span>
+<i class="iconfont icon-right"></i></a></nav></footer></article></div></div></main><footer id=footer class=footer><div class=social-links></div><div class=copyright><span class=power-by>由 <a class=hexo-link href=https://gohugo.io>Hugo</a> 强力驱动
+</span><span class=division>|</span>
+<span class=theme-info>主题 -
+<a class=theme-link href=https://github.com/olOwOlo/hugo-theme-even>Even</a>
+</span><span class=copyright-year>&copy;
+2017 -
+2025<span class=heart><i class="iconfont icon-heart"></i></span><span>Chen Guixian</span></span></div></footer><div class=back-to-top id=back-to-top><i class="iconfont icon-up"></i></div></div><script src=https://cdn.jsdelivr.net/npm/jquery@3.2.1/dist/jquery.min.js integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/slideout@1.0.1/dist/slideout.min.js integrity="sha256-t+zJ/g8/KXIJMjSVQdnibt4dlaDxc9zXr/9oNPeWqdg=" crossorigin=anonymous></script><script src=https://cdn.jsdelivr.net/npm/@fancyapps/fancybox@3.1.20/dist/jquery.fancybox.min.js integrity="sha256-XVLffZaxoWfGUEbdzuLi7pwaUJv1cecsQJQqGLe7axY=" crossorigin=anonymous></script><script type=text/javascript src=/js/main.min.4ae89da218555efa0e7093a20b92017d2e1202b66fff9fc2edf4cb8d44b44c6e.js></script><script async src="https://www.googletagmanager.com/gtag/js?id=G-T2MFM23ZJM"></script><script>var dnt,doNotTrack=!1;if(!1&&(dnt=navigator.doNotTrack||window.doNotTrack||navigator.msDoNotTrack,doNotTrack=dnt=="1"||dnt=="yes"),!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-T2MFM23ZJM")}</script></body></html>
